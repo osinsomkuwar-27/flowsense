@@ -1,0 +1,14 @@
+{
+  "name": "flowant-pulse-ai-engine",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "AI engine for FlowAnt Pulse — Groq-first, Gemini fallback",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "groq-sdk": "^0.9.1",
+    "@google/generative-ai": "^0.21.0"
+  }
+}
