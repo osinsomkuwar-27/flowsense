@@ -1,0 +1,68 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+
+# Build output
+dist/
+build/
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# Temporary files
+tmp/
+temp/
+
+# Test output
+.nyc_output/
+
+# Generated reports
+reports/
+exports/
+
+# API secrets (if stored separately)
+secrets/
+credentials.json
+
+# Local databases
+*.sqlite
+*.sqlite3
+
+# Docker (optional)
+.docker/
+
+# Misc
+*.tgz
