@@ -1,4 +1,4 @@
-import { jiraGet } from "./client";
+import { jiraGet, jiraPost } from "./client";
 import { config } from "../../config";
 import { normalizeMany } from "../../normalizer";
 import { NormalizedEvent, Severity } from "../../types";
@@ -38,11 +38,18 @@ function jiraSeverity(priority: string): Severity {
 }
 
 async function pollIssues(projectKey: string): Promise<NormalizedEvent[]> {
-  const jql = `project = ${projectKey} AND updated >= -1h ORDER BY updated DESC`;
-  const res = await jiraGet<JiraSearchResult>("/rest/api/3/search", {
+  // Removed time filter (-1h) — was causing 400. Fetch all recent issues instead.
+  const jql = `project = ${projectKey} ORDER BY updated DESC`;
+
+const res = await jiraPost<JiraSearchResult>("/rest/api/3/search/jql", {
     jql,
     maxResults: 100,
-    fields: "summary,status,priority,issuetype,created,updated,resolutiondate,assignee,reporter,comment,customfield_10016,customfield_10020",
+    fields: [
+      "summary", "status", "priority", "issuetype",
+      "created", "updated", "resolutiondate", "assignee",
+      "reporter", "comment", "customfield_10016", "customfield_10020"
+    ],
+    fieldsByKeys: false,
   });
 
   return normalizeMany(
@@ -81,83 +88,16 @@ async function pollIssues(projectKey: string): Promise<NormalizedEvent[]> {
   );
 }
 
-async function pollSprintVelocity(projectKey: string): Promise<NormalizedEvent[]> {
-  // Jira Agile API — get current board
-  try {
-    const boards = await jiraGet<{ values: { id: number; name: string }[] }>(
-      "/rest/agile/1.0/board",
-      { projectKeyOrId: projectKey, maxResults: 1 }
-    );
-    if (!boards.values.length) return [];
-    const boardId = boards.values[0].id;
-
-    const sprints = await jiraGet<{ values: { id: number; name: string; state: string; startDate?: string; endDate?: string }[] }>(
-      `/rest/agile/1.0/board/${boardId}/sprint`,
-      { state: "active,closed", maxResults: 2 }
-    );
-
-    const events: NormalizedEvent[] = [];
-    for (const sprint of sprints.values) {
-      const sprintIssues = await jiraGet<JiraSearchResult>(
-        "/rest/api/3/search",
-        {
-          jql: `sprint = ${sprint.id} AND project = ${projectKey}`,
-          maxResults: 200,
-          fields: "status,customfield_10016,resolutiondate",
-        }
-      );
-      const totalPoints = sprintIssues.issues.reduce(
-        (sum, i) => sum + (i.fields.customfield_10016 ?? 0),
-        0
-      );
-      const completedPoints = sprintIssues.issues
-        .filter((i) => i.fields.resolutiondate)
-        .reduce((sum, i) => sum + (i.fields.customfield_10016 ?? 0), 0);
-
-      const normalized = normalizeMany([
-        {
-          source: "jira",
-          eventType: "sprint.velocity",
-          resource: `${config.jira.baseUrl}/jira/software/projects/${projectKey}/boards/${boardId}`,
-          timestamp: sprint.startDate ?? new Date().toISOString(),
-          metric: "sprint.velocity_points",
-          value: completedPoints,
-          severity: completedPoints < totalPoints * 0.5 ? "high" : "low",
-          status: sprint.state === "active" ? "open" : "resolved",
-          tags: ["jira", "sprint", "velocity", projectKey],
-          metadata: {
-            sprintId: sprint.id,
-            sprintName: sprint.name,
-            sprintState: sprint.state,
-            totalPoints,
-            completedPoints,
-            completionRate: totalPoints > 0 ? completedPoints / totalPoints : 0,
-            boardId,
-          },
-        },
-      ]);
-      events.push(...normalized);
-    }
-    return events;
-  } catch (err) {
-    logger.warn(`[Jira] Could not poll sprint velocity for ${projectKey}`, {
-      error: (err as Error).message,
-    });
-    return [];
-  }
-}
+// Sprint velocity removed — KK is a Jira Core project, Agile API not supported
 
 export async function pollJira(): Promise<NormalizedEvent[]> {
   const allEvents: NormalizedEvent[] = [];
 
   for (const projectKey of config.jira.projectKeys) {
     try {
-      const [issues, velocity] = await Promise.all([
-        pollIssues(projectKey),
-        pollSprintVelocity(projectKey),
-      ]);
-      allEvents.push(...issues, ...velocity);
-      logger.info(`[Jira] Polled ${projectKey}: ${issues.length} issues, ${velocity.length} sprint events`);
+      const issues = await pollIssues(projectKey);
+      allEvents.push(...issues);
+      logger.info(`[Jira] Polled ${projectKey}: ${issues.length} issues`);
     } catch (err) {
       logger.error(`[Jira] Failed to poll project ${projectKey}`, {
         error: (err as Error).message,

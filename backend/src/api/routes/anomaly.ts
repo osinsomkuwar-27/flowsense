@@ -2,6 +2,7 @@
 // She hits these endpoints to pull raw normalized events for analysis
 import { Router, Request, Response } from "express";
 import { eventStore } from "../../events/eventStore";
+import { logger } from "../../logger";
 
 const router = Router();
 
@@ -32,6 +33,20 @@ router.get("/context", (req: Request, res: Response) => {
   data = data.slice(-limit);
 
   res.json({ success: true, data, count: data.length });
+});
+
+router.post("/report", (req: Request, res: Response) => {
+  const anomaly = req.body;
+  if (!anomaly || typeof anomaly !== "object") {
+    res.status(400).json({ success: false, error: "Invalid payload" });
+    return;
+  }
+  logger.info("[Anomaly] Received anomaly report", {
+    metric: anomaly.context?.metric,
+    severity: anomaly.severity,
+    anomalyId: anomaly.anomalyId,
+  });
+  res.json({ success: true, message: "Anomaly received" });
 });
 
 export default router;
