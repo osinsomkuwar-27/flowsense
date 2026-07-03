@@ -7,7 +7,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const GROQ_MODEL = "llama-3.3-70b-versatile";
 const GEMINI_MODEL = "gemini-2.0-flash";
-const GROQ_TIMEOUT_MS = 8000;
+const GROQ_TIMEOUT_MS = 150000;
 
 /**
  * @param {string} prompt

@@ -12,7 +12,7 @@ export function buildExplainerPrompt(anomaly) {
 - Metric: ${metric}
 - Observed value: ${value}
 - 7-day rolling baseline: ${baseline}
-- Z-score: ${zScore.toFixed(2)}
+- Z-score: ${zScore != null ? Number(zScore).toFixed(2) : "N/A"}
 - Severity: ${severity.toUpperCase()}
 - Detected at: ${timestamp}
 ${Object.keys(metadata).length ? `- Extra context: ${JSON.stringify(metadata)}` : ""}
