@@ -10,10 +10,10 @@
  */
 
 const SEVERITY_THRESHOLDS = {
-  critical: 3.5,
-  high: 2.5,
-  medium: 2.0,
-  low: 1.5,
+  critical: 2.0,
+  low: 0.5,
+  medium: 0.8,
+  high: 1.2,
 };
 
 /**
@@ -65,7 +65,7 @@ function classifySeverity(absZ) {
  * @returns {Array} anomaly events
  */
 function detectAnomalies(metricName, series, opts = {}) {
-  const { windowSize = 24, checkLastN = 1 } = opts;
+  const { windowSize = 5, checkLastN = 1 } = opts;
 
   if (series.length < windowSize + 1) {
     return []; // not enough history yet

@@ -10,7 +10,7 @@
 
 const { detectFromNormalizedEvents } = require("./adapter");
 
-const BACKEND_BASE_URL = process.env.BACKEND_URL || "http://localhost:3000";
+const BACKEND_BASE_URL = process.env.BACKEND_URL || "http://localhost:4000";
 
 /**
  * Pulls all recent events (optionally filtered by source) from the feed endpoint.
@@ -65,7 +65,7 @@ async function fetchContext(opts = {}) {
  * @returns {Promise<Array>} AnomalyPayload[]
  */
 async function runLiveDetectionCycle(opts = {}) {
-  const { source, limit = 500, windowSize = 24, checkLastN = 1 } = opts;
+  const { source, limit = 500, windowSize = 3, checkLastN = 3 } = opts;
 
   const events = await fetchFeed({ source, limit });
   const anomalies = detectFromNormalizedEvents(events, { windowSize, checkLastN });
