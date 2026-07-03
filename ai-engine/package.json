@@ -5,6 +5,7 @@
   "description": "AI engine for FlowAnt Pulse — Groq-first, Gemini fallback",
   "main": "index.js",
   "scripts": {
+    "start": "node poller.js",
     "test": "node test.js"
   },
   "dependencies": {

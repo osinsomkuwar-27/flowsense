@@ -24,3 +24,16 @@ export async function jiraGet<T>(path: string, params?: Record<string, unknown>)
     `jira:GET:${path}`
   );
 }
+
+export async function jiraPost<T>(
+  path: string,
+  data?: Record<string, unknown>
+): Promise<T> {
+  return withRetry(
+    () =>
+      jiraLimiter.schedule(() =>
+        jiraAxios.post<T>(path, data).then((r) => r.data)
+      ),
+    `jira:POST:${path}`
+  );
+}
