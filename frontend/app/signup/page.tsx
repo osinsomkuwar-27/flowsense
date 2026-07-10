@@ -34,7 +34,7 @@ export default function SignUp() {
         <div className="relative flex-1 overflow-hidden bg-[#0F172A] hidden md:block">
           <div className="absolute inset-0 bg-[radial-gradient(140%_120%_at_50%_100%,rgba(202,229,255,0.25)_0%,rgba(152,181,237,0.15)_28%,rgba(74,78,105,0.4)_54%,rgba(34,34,59,0.9)_100%)]" />
           <div className="absolute -bottom-24 left-1/2 h-[340px] w-[600px] -translate-x-1/2 rounded-full bg-[#64748B]/20 blur-3xl" />
-          <div className="absolute top-[-80px] left-1/2 h-[300px] w-[700px] -translate-x-1/2 rounded-full bg-[#8F2D56]/15 blur-3xl" />
+          <div className="absolute top-[-80px] left-1/2 h-[300px] w-[700px] -translate-x-1/2 rounded-full bg-[#6f7bd2]/15 blur-3xl" />
           <div className="relative flex h-full flex-col items-center justify-center p-12 text-center">
             <Logo size={64} white />
             <p className="mt-6 max-w-sm text-sm leading-relaxed text-white/60">
@@ -51,7 +51,7 @@ export default function SignUp() {
                   key={feature}
                   className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white/70 backdrop-blur-sm"
                 >
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#8F2D56]" />
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#6f7bd2]" />
                   {feature}
                 </div>
               ))}
@@ -79,7 +79,7 @@ export default function SignUp() {
                 Already have an account?{" "}
                 <button
                   onClick={() => router.push("/login")}
-                  className="font-medium text-[#8F2D56] hover:text-[#64748B] transition-colors"
+                  className="font-medium text-[#6f7bd2] hover:text-[#64748B] transition-colors"
                 >
                   Sign in
                 </button>

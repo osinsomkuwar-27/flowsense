@@ -1,6 +1,6 @@
 "use client"
 
-import { motion, useScroll, useTransform } from "framer-motion"
+import { motion, useScroll, useTransform, MotionValue } from "framer-motion"
 import { useRef } from "react"
 import { Link2, Activity, AlertTriangle, Workflow } from "lucide-react"
 
@@ -72,38 +72,64 @@ function StepRail() {
 
   return (
     <div ref={ref} className="relative mt-16 space-y-0">
-      {/* Progress line */}
-      <div className="absolute left-6 top-0 bottom-0 w-px bg-[#e2e6f4] sm:left-8 lg:left-1/2 lg:-translate-x-px">
+      {/* Mobile straight line — single and thin */}
+      <div className="absolute left-6 top-0 bottom-0 w-[1.5px] sm:left-8 lg:hidden">
         <motion.div
-          className="w-full origin-top bg-gradient-to-b from-[#6f7bd2] to-[#8F2D56]"
+          className="w-full origin-top bg-[#6f7bd2]"
           style={{ scaleY: scrollYProgress, height: "100%" }}
         />
       </div>
 
+      {/* Desktop curved winding path — single, curved, and thin */}
+      <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-48 hidden lg:block">
+        <svg viewBox="0 0 100 100" className="h-full w-full" preserveAspectRatio="none">
+          <motion.path
+            d="M 50 0 L 50 12.5 C 20 20.8, 20 29.2, 50 37.5 C 80 45.8, 80 54.2, 50 62.5 C 20 70.8, 20 79.2, 50 87.5 L 50 100"
+            fill="none"
+            stroke="#6f7bd2"
+            strokeWidth="1.5"
+            style={{ pathLength: scrollYProgress }}
+          />
+        </svg>
+      </div>
+
       {steps.map((step, i) => (
-        <StepCard key={step.index} step={step} index={i} />
+        <StepCard key={step.index} step={step} index={i} progress={scrollYProgress} />
       ))}
     </div>
   )
 }
 
-function StepCard({ step, index }: { step: Step; index: number }) {
+function StepCard({
+  step,
+  index,
+  progress,
+}: {
+  step: Step
+  index: number
+  progress: MotionValue<number>
+}) {
   const Icon = step.icon
   const isEven = index % 2 === 0
 
+  // Calculate progress markers for each dot (Dot 1: 0.125, Dot 2: 0.375, Dot 3: 0.625, Dot 4: 0.875)
+  const dotProgress = 0.125 + index * 0.25
+  const startProgress = Math.max(0, dotProgress - 0.12)
+  const endProgress = dotProgress
+
+  const opacity = useTransform(progress, [startProgress, endProgress], [0, 1])
+  const y = useTransform(progress, [startProgress, endProgress], [40, 0])
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.7, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
-      className={`relative flex items-start gap-6 py-10 pl-16 sm:pl-20 lg:pl-0 ${
+      style={{ opacity, y }}
+      className={`relative flex items-start gap-6 py-28 lg:py-36 pl-16 sm:pl-20 lg:pl-0 ${
         isEven ? "lg:flex-row" : "lg:flex-row-reverse"
       } lg:items-center lg:gap-16`}
     >
-      {/* Dot on the line */}
-      <div className="absolute left-4 top-12 z-10 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[#6f7bd2] bg-white sm:left-6 lg:left-1/2 lg:-translate-x-1/2">
-        <div className="h-2 w-2 rounded-full bg-[#6f7bd2]" />
+      {/* Milestone Number Circle on the line */}
+      <div className="absolute left-2 top-11 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-[#6f7bd2] text-white font-display font-medium text-sm sm:left-4 lg:left-1/2 lg:-translate-x-1/2 lg:top-1/2 lg:-translate-y-1/2 shadow-[0_0_0_6px_#f8f9fd]">
+        {step.index}
       </div>
 
       {/* Content */}
@@ -117,12 +143,8 @@ function StepCard({ step, index }: { step: Step; index: number }) {
         <p className="mt-2 text-sm leading-relaxed text-[#64748b]">{step.body}</p>
       </div>
 
-      {/* Icon card */}
-      <div className={`hidden lg:flex flex-1 ${isEven ? "justify-start" : "justify-end"}`}>
-        <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-[#e2e6f4] bg-white shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
-          <Icon className="h-8 w-8 text-[#334155]" />
-        </div>
-      </div>
+      {/* Empty placeholder column to balance layout on desktop */}
+      <div className="hidden lg:block flex-1" />
     </motion.div>
   )
 }

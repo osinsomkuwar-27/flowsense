@@ -4,9 +4,6 @@ import { HeroSection } from "@/components/landing/hero-section"
 const RunningHeadlines = dynamic(
   () => import("@/components/landing/running-headlines").then((mod) => mod.RunningHeadlines),
 )
-const ImpactSection = dynamic(
-  () => import("@/components/landing/impact-section").then((mod) => mod.ImpactSection),
-)
 const HowItWorksSection = dynamic(
   () => import("@/components/landing/how-it-works-section").then((mod) => mod.HowItWorksSection),
 )
@@ -40,7 +37,6 @@ export default function Home() {
       <FeaturesSection />
       <HowItWorksSection />
       <RunningHeadlines />
-      <ImpactSection />
       <BuiltForSection />
       {/* <PricingSection />
       <FaqSection /> */}

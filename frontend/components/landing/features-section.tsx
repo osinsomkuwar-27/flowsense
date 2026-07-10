@@ -125,14 +125,14 @@ function FeatureLayer({
       className="absolute inset-0 grid grid-cols-1 md:grid-cols-2 overflow-hidden rounded-[2rem] border border-[#e2e8f0] bg-white shadow-[0_15px_50px_rgba(0,0,0,0.05)]"
       style={{ y, opacity, zIndex: index + 1 }}
     >
-      {/* Visual Half */}
+      {/* Visual Half — light periwinkle with concentric circles & number */}
       <div
-        className={`relative h-[180px] md:h-auto overflow-hidden bg-slate-50 flex items-center justify-center border-slate-100 ${
-          isEven ? "md:order-1 md:border-r" : "md:order-2 md:border-l"
+        className={`relative h-[180px] md:h-auto overflow-hidden bg-[#eef0fb] flex items-center justify-center ${
+          isEven ? "md:order-1 md:border-r border-[#e2e6f4]" : "md:order-2 md:border-l border-[#e2e6f4]"
         } border-b md:border-b-0`}
       >
         <svg
-          className="absolute inset-0 h-full w-full opacity-[0.25] text-[#334155]"
+          className="absolute inset-0 h-full w-full text-[#6f7bd2]/20"
           viewBox="0 0 400 400"
           fill="none"
           stroke="currentColor"
@@ -149,22 +149,22 @@ function FeatureLayer({
           <circle cx={feature.patternCx} cy={feature.patternCy} r="210" strokeWidth="1" />
           <circle cx={feature.patternCx} cy={feature.patternCy} r="230" strokeWidth="1" />
         </svg>
-        <span className="absolute bottom-[-10px] font-display text-[130px] font-bold tracking-tighter text-[#334155]/12 select-none">
+        <span className="absolute bottom-[-10px] right-4 font-display text-[130px] font-bold tracking-tighter text-[#6f7bd2]/20 select-none">
           {feature.id}
         </span>
       </div>
 
       {/* Text Details Half */}
       <div
-        className={`p-6 sm:p-8 md:p-12 flex flex-col items-start gap-4 md:gap-5 justify-center relative z-10 ${
+        className={`p-6 sm:p-8 md:p-12 flex flex-col items-start gap-4 md:gap-5 justify-center relative z-10 bg-white ${
           isEven ? "md:order-2" : "md:order-1"
         }`}
       >
-        <span className="text-[10px] font-bold tracking-[0.16em] text-[#334155]/80 uppercase">
+        <span className="text-[10px] font-bold tracking-[0.16em] text-[#6f7bd2] uppercase">
           - {feature.id}, FEATURE
         </span>
 
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#334155] text-white">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#6f7bd2] text-white">
           {feature.icon}
         </div>
 
@@ -175,10 +175,6 @@ function FeatureLayer({
         <p className="text-sm leading-relaxed text-[#64748b]">
           {feature.body}
         </p>
-
-        <span className="inline-flex items-center rounded-full bg-[rgba(74,78,105,0.06)] px-4 py-1.5 text-xs font-semibold text-[#334155]">
-          FlowSense feature
-        </span>
       </div>
 
       {/* Background overlay that dims the card when covered */}
@@ -234,15 +230,6 @@ export function FeaturesSection() {
         </div>
       </div>
 
-      {/* Get started button at bottom */}
-      <div className="mt-12 flex justify-center bg-transparent">
-        <Link href="/signup">
-          <Button size="lg">
-            Start monitoring
-            <ArrowRight className="ml-1.5 h-4 w-4" />
-          </Button>
-        </Link>
-      </div>
     </section>
   )
 }

@@ -138,7 +138,7 @@ export function PricingSection() {
               <ul className="mt-6 space-y-2.5">
                 {tier.features.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm">
-                    <Check className={`mt-0.5 h-4 w-4 shrink-0 ${tier.highlight ? "text-[#8F2D56]" : "text-[#6f7bd2]"}`} />
+                    <Check className={`mt-0.5 h-4 w-4 shrink-0 ${tier.highlight ? "text-[#8f9be6]" : "text-[#6f7bd2]"}`} />
                     <span className={tier.highlight ? "text-white/85" : "text-[#334155]"}>{f}</span>
                   </li>
                 ))}

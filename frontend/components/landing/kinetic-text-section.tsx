@@ -68,7 +68,7 @@ function AnimWord({ word }: { word: WordAnim }) {
   const opacity = isVisible ? 1 : 0
   const blur    = isVisible ? 0 : 18
   const scale   = isVisible ? 1 : isExiting ? 1.08 : 1.12
-  const color   = word.highlight ? (isVisible ? "#8F2D56" : "#0d0d0d") : "#0d0d0d"
+  const color   = word.highlight ? (isVisible ? "#6f7bd2" : "#0d0d0d") : "#0d0d0d"
 
   return (
     <span

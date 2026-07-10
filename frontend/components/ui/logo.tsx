@@ -19,11 +19,11 @@ export function Logo({
       <defs>
         <linearGradient id="flowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor={white ? "#FFF" : colors.navy} />
-          <stop offset="50%" stopColor={white ? colors.rose : colors.indigo} />
+          <stop offset="50%" stopColor={white ? colors.accent : colors.indigo} />
           <stop offset="100%" stopColor={white ? colors.cream : colors.mauve} />
         </linearGradient>
         <linearGradient id="senseGrad" x1="100%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor={white ? colors.cream : colors.rose} />
+          <stop offset="0%" stopColor={white ? colors.cream : colors.accent} />
           <stop offset="100%" stopColor={white ? "rgba(255,255,255,0.2)" : "rgba(74, 78, 105, 0.2)"} />
         </linearGradient>
       </defs>

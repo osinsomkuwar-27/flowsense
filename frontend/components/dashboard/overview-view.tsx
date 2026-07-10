@@ -97,7 +97,7 @@ export function OverviewView() {
 
   // Data for radial rings (resolution rate and pipeline uptime)
   const resRingData = [
-    { name: "Resolved", value: 75, fill: colors.rose },
+    { name: "Resolved", value: 75, fill: colors.accent },
     { name: "Remaining", value: 25, fill: "#F1F5F9" },
   ]
   const uptimeRingData = [
@@ -321,7 +321,7 @@ export function OverviewView() {
                 This week
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: colors.rose }} />
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: colors.accent }} />
                 Last week
               </div>
             </div>
@@ -336,8 +336,8 @@ export function OverviewView() {
                     <stop offset="95%" stopColor={colors.navy} stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="baselineGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={colors.rose} stopOpacity={0.12} />
-                    <stop offset="95%" stopColor={colors.rose} stopOpacity={0} />
+                    <stop offset="5%" stopColor={colors.accent} stopOpacity={0.12} />
+                    <stop offset="95%" stopColor={colors.accent} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
@@ -356,7 +356,7 @@ export function OverviewView() {
                   name="Last week"
                   type="monotone"
                   dataKey="baseline"
-                  stroke={colors.rose}
+                  stroke={colors.accent}
                   strokeWidth={2}
                   fill="url(#baselineGradient)"
                 />

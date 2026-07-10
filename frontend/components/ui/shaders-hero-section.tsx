@@ -8,12 +8,12 @@ export function ShaderBackground({ children }: { children?: React.ReactNode }) {
     <div className="min-h-screen w-full relative overflow-hidden">
       <MeshGradient
         className="absolute inset-0 w-full h-full"
-        colors={["#0F172A", "#334155", "#64748B", "#8F2D56", "#ffffff"]}
+        colors={["#0F172A", "#334155", "#64748B", "#6f7bd2", "#ffffff"]}
         speed={0.3}
       />
       <MeshGradient
         className="absolute inset-0 w-full h-full opacity-60"
-        colors={["#0F172A", "#64748B", "#ffffff", "#334155", "#8F2D56"]}
+        colors={["#0F172A", "#64748B", "#ffffff", "#334155", "#6f7bd2"]}
         speed={0.15}
       />
       <div className="relative z-10">{children}</div>

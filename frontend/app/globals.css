@@ -8,8 +8,8 @@
   --color-navy:   #0F172A;
   --color-indigo: #334155;
   --color-mauve:  #64748B;
-  --color-rose:   #8F2D56;
-  --color-gold:   #FFBC42;
+  --color-accent: #6f7bd2;
+  --color-accent-light: #8f9be6;
   --color-ruby:   #D81159;
   --color-cream:  #ffffff;
 
@@ -32,8 +32,8 @@
   --input: #e2e8f0;
   --ring: #0F172A;
   --radius: 0.5rem;
-  --chart-1: #8F2D56;
-  --chart-2: #FFBC42;
+  --chart-1: #6f7bd2;
+  --chart-2: #8f9be6;
   --chart-3: #D81159;
   --chart-4: #334155;
   --chart-5: #0F172A;
@@ -146,20 +146,58 @@ body {
   animation: marquee 40s linear infinite;
 }
 
-/* ── Scrollbar styling ── */
+/* ── Hide scrollbar globally ── */
 ::-webkit-scrollbar {
-  width: 6px;
+  display: none;
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+html, body {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
+@layer utilities {
+  .bg-gradient-hero {
+    background: linear-gradient(180deg, #cfd4eb 0%, #66739f 60%, #4f5d86 100%);
+  }
+  .shadow-3d {
+    box-shadow: 0 30px 80px -30px rgba(88, 104, 177, 0.35), 0 10px 30px -15px rgba(88, 104, 177, 0.2);
+  }
+  .orb {
+    border-radius: 9999px;
+    background: radial-gradient(circle at 30% 25%, #ffffff, #d8ddff 35%, #97a3e7 75%, #6c78b3 100%);
+  }
+  .orb-soft {
+    border-radius: 9999px;
+    background: radial-gradient(circle at 30% 25%, #ffffff, #eef1ff 55%, #c4caeb 100%);
+  }
+  .bg-grid {
+    background-image: linear-gradient(rgba(99, 109, 194, 0.09) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99, 109, 194, 0.09) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+  .mask-fade-edges {
+    mask-image: radial-gradient(ellipse at center, #000 55%, transparent 90%);
+    -webkit-mask-image: radial-gradient(ellipse at center, #000 55%, transparent 90%);
+  }
+  
+  @keyframes float-y {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-14px); }
+  }
+  .animate-float { animation: float-y 7s ease-in-out infinite; }
 
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
+  @keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .animate-spin-slow { animation: spin-slow 18s linear infinite; }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  @keyframes shimmer {
+    0% { transform: translateX(-120%); opacity: 0; }
+    18% { opacity: 0.3; }
+    50% { opacity: 0.55; }
+    82% { opacity: 0.3; }
+    100% { transform: translateX(120%); opacity: 0; }
+  }
+  .animate-shimmer { animation: shimmer 4.5s ease-in-out infinite; }
 }

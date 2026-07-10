@@ -33,12 +33,12 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1.6, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-6 font-display text-5xl leading-[1.08] tracking-tight text-white sm:text-6xl lg:text-7xl"
+              className="mt-6 font-display text-4xl leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl"
             >
-              Your DevOps Pulse,
+              See Everything. Catch Anything.
               <br />
-              <span className="text-[#FFBC42]">
-                Always Visible.
+              <span className="text-white">
+                Fix It Before It Ships.
               </span>
             </motion.h1>
 
@@ -46,7 +46,7 @@ export function HeroSection() {
               variants={heroItem}
               className="mt-5 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg"
             >
-              FlowSense monitors your GitHub, Jira, and Notion workflows — detects anomalies in real-time and suggests AI-powered fixes.
+              AI-driven workflow monitoring for modern engineering teams.
             </motion.p>
 
             <motion.div
@@ -59,14 +59,6 @@ export function HeroSection() {
                 >
                   Get Started
                   <ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover/button:translate-x-0.5" />
-                </Button>
-              </Link>
-              <Link href="/#how-it-works">
-                <Button
-                  variant="secondary"
-                  size="lg"
-                >
-                  See How It Works
                 </Button>
               </Link>
             </motion.div>

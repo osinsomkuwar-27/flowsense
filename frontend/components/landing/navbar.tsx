@@ -34,11 +34,11 @@ export function Navbar() {
             : "border-transparent bg-transparent shadow-none backdrop-blur-none"
         }`}
       >
-        <div className="mx-auto flex items-center justify-between">
+        <div className="relative mx-auto flex items-center justify-between">
           <BrandLogo whiteIcon={!scrolled} />
 
           {/* Desktop nav */}
-          <div className="hidden items-center gap-1 md:flex">
+          <div className="hidden items-center gap-1 md:flex md:absolute md:left-1/2 md:-translate-x-1/2">
             {navItems.map((item) => (
               <Link
                 key={item.label}
@@ -59,7 +59,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="hidden sm:inline-flex"
+                className={`hidden sm:inline-flex ${!scrolled ? "text-white hover:text-white hover:bg-white/10" : ""}`}
               >
                 Sign in
               </Button>
