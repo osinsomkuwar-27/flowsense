@@ -4,9 +4,9 @@ import { BrandLogo } from "@/components/ui/brand-logo"
 const footerLinks = {
   Product: [
     { label: "Features", href: "/#features" },
-    { label: "Integrations", href: "/#integrations" },
-    { label: "Pricing", href: "/#pricing" },
-    { label: "Changelog", href: "#" },
+    { label: "How it works", href: "/#how-it-works" },
+    { label: "Built For", href: "/#built-for" },
+    { label: "Referrals", href: "/#referrals" },
   ],
   Resources: [
     { label: "Documentation", href: "#" },

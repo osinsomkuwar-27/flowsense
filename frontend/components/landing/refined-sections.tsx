@@ -27,7 +27,7 @@ export function BuiltForSection() {
   ]
 
   return (
-    <section className="relative overflow-hidden py-28">
+    <section id="built-for" className="relative overflow-hidden py-28">
       <div className="orb-soft absolute -left-20 top-10 -z-10 h-56 w-56 animate-float opacity-70" />
       <div className="orb-soft absolute -right-24 bottom-10 -z-10 h-72 w-72 animate-float-slow opacity-60" />
 

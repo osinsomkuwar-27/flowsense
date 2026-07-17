@@ -23,6 +23,9 @@ export default function SignUp() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    if (typeof window !== "undefined") {
+      localStorage.setItem("userFullName", formData.fullName)
+    }
     // Will integrate backend auth later
     router.push("/dashboard")
   }
@@ -30,35 +33,6 @@ export default function SignUp() {
   return (
     <div className="flex min-h-screen w-screen items-center justify-center bg-slate-100 p-6">
       <div className="relative flex h-[85vh] w-full max-w-6xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
-        {/* Left panel — brand visual */}
-        <div className="relative flex-1 overflow-hidden bg-[#0F172A] hidden md:block">
-          <div className="absolute inset-0 bg-[radial-gradient(140%_120%_at_50%_100%,rgba(202,229,255,0.25)_0%,rgba(152,181,237,0.15)_28%,rgba(74,78,105,0.4)_54%,rgba(34,34,59,0.9)_100%)]" />
-          <div className="absolute -bottom-24 left-1/2 h-[340px] w-[600px] -translate-x-1/2 rounded-full bg-[#64748B]/20 blur-3xl" />
-          <div className="absolute top-[-80px] left-1/2 h-[300px] w-[700px] -translate-x-1/2 rounded-full bg-[#6f7bd2]/15 blur-3xl" />
-          <div className="relative flex h-full flex-col items-center justify-center p-12 text-center">
-            <Logo size={64} white />
-            <p className="mt-6 max-w-sm text-sm leading-relaxed text-white/60">
-              Join teams that catch issues before they become incidents. Set up in under 5 minutes.
-            </p>
-            <div className="mt-8 space-y-3 w-full max-w-xs">
-              {[
-                "Connect GitHub, Jira & Notion",
-                "AI-powered anomaly detection",
-                "Workflow optimization suggestions",
-                "Free tier — no credit card required",
-              ].map((feature) => (
-                <div
-                  key={feature}
-                  className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white/70 backdrop-blur-sm"
-                >
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#6f7bd2]" />
-                  {feature}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
         {/* Back button */}
         <div className="absolute top-5 left-5 z-20">
           <Button
@@ -70,10 +44,13 @@ export default function SignUp() {
           </Button>
         </div>
 
-        {/* Right panel — form */}
-        <div className="flex flex-1 items-center justify-center bg-white">
-          <div className="w-full max-w-sm p-6">
-            <div className="mb-8">
+        {/* Left panel — form */}
+        <div className="flex flex-1 flex-col items-center justify-center bg-white z-10 py-12 overflow-y-auto">
+          <div className="w-full max-w-sm px-6">
+            <div className="mb-8 text-center">
+              <div className="mb-6 flex justify-center">
+                <Logo size={48} />
+              </div>
               <h1 className="mb-2 text-2xl font-bold text-gray-900">Create Account</h1>
               <p className="text-sm text-gray-600">
                 Already have an account?{" "}
@@ -81,7 +58,7 @@ export default function SignUp() {
                   onClick={() => router.push("/login")}
                   className="font-medium text-[#6f7bd2] hover:text-[#64748B] transition-colors"
                 >
-                  Sign in
+                  Log in
                 </button>
               </p>
             </div>
@@ -150,16 +127,22 @@ export default function SignUp() {
 
               <Button
                 type="submit"
+                variant="primary"
                 className="w-full"
               >
                 Create account
               </Button>
-
-              <p className="text-center text-xs text-gray-400">
-                By signing up, you agree to our Terms of Service and Privacy Policy.
-              </p>
             </form>
           </div>
+        </div>
+
+        {/* Right panel — brand visual */}
+        <div 
+          className="relative flex-1 overflow-hidden bg-cover bg-center hidden md:block"
+          style={{ backgroundImage: "url('/auth-side-bg.png')" }}
+        >
+          {/* Subtle overlay gradient for aesthetic depth */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-slate-950/20 via-slate-900/10 to-transparent" />
         </div>
       </div>
     </div>

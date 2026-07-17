@@ -33,47 +33,34 @@ export function LoginPage() {
   return (
     <div className="flex min-h-screen w-screen items-center justify-center bg-slate-100 p-6">
       <div className="relative flex h-[80vh] w-full max-w-6xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
-        {/* Left panel — brand visual */}
-        <div className="relative flex-1 overflow-hidden bg-[#0F172A] hidden md:block">
-          <div className="absolute inset-0 bg-[radial-gradient(140%_120%_at_50%_0%,rgba(202,229,255,0.25)_0%,rgba(152,181,237,0.15)_28%,rgba(74,78,105,0.4)_54%,rgba(34,34,59,0.9)_100%)]" />
-          <div className="absolute -top-24 left-1/2 h-[340px] w-[600px] -translate-x-1/2 rounded-full bg-[#64748B]/20 blur-3xl" />
-          <div className="absolute bottom-[-80px] left-1/2 h-[300px] w-[700px] -translate-x-1/2 rounded-full bg-[#0F172A]/60 blur-3xl" />
-          <div className="relative flex h-full flex-col items-center justify-center p-12 text-center">
-            <Logo size={64} white />
-            <p className="mt-6 max-w-sm text-sm leading-relaxed text-white/60">
-              Your DevOps pulse, always visible. Monitor workflows, detect anomalies, and resolve issues faster.
-            </p>
-            <div className="mt-8 grid grid-cols-2 gap-3">
-              {[
-                { label: "Events Today", value: "1,247" },
-                { label: "Active Pipelines", value: "18" },
-                { label: "Open Anomalies", value: "7" },
-                { label: "Resolution Rate", value: "93%" },
-              ].map((stat) => (
-                <div key={stat.label} className="rounded-lg border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
-                  <p className="text-[10px] text-white/40 uppercase tracking-wider">{stat.label}</p>
-                  <p className="mt-1 text-lg font-bold text-white/90">{stat.value}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Back button */}
+        {/* Back button (overlayed over the left panel) */}
         <div className="absolute top-5 left-5 z-20">
           <Button
-            variant="secondary"
+            variant="outline"
             size="icon"
             onClick={() => router.push("/")}
+            className="rounded-full bg-white/10 hover:bg-white/20 border-white/20 text-white backdrop-blur-sm transition-all duration-300"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
         </div>
 
+        {/* Left panel — brand visual */}
+        <div 
+          className="relative flex-1 overflow-hidden bg-cover bg-center hidden md:block"
+          style={{ backgroundImage: "url('/auth-side-bg.png')" }}
+        >
+          {/* Subtle overlay gradient for aesthetic depth */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-slate-950/20 via-slate-900/10 to-transparent" />
+        </div>
+
         {/* Right panel — form */}
-        <div className="flex flex-1 items-center justify-center bg-white">
-          <div className="w-full max-w-sm p-6">
-            <div className="mb-8">
+        <div className="flex flex-1 flex-col items-center justify-center bg-white z-10 py-12 overflow-y-auto">
+          <div className="w-full max-w-sm px-6">
+            <div className="mb-8 text-center">
+              <div className="mb-6 flex justify-center">
+                <Logo size={48} />
+              </div>
               <h1 className="mb-2 text-2xl font-bold text-gray-900">Welcome Back</h1>
               <p className="text-sm text-gray-600">
                 Don&apos;t have an account?{" "}
@@ -139,9 +126,10 @@ export function LoginPage() {
 
               <Button
                 type="submit"
+                variant="primary"
                 className="w-full"
               >
-                Sign in
+                Log in
               </Button>
             </form>
 

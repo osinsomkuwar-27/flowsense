@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
 import {
   LayoutDashboard,
   Activity,
@@ -50,6 +51,31 @@ export function Sidebar({
   onToggle: () => void
 }) {
   const pathname = usePathname()
+  const router = useRouter()
+  const [userName, setUserName] = useState("Demo User")
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("userFullName")
+      if (stored) {
+        setUserName(stored)
+      }
+    }
+  }, [])
+
+  const userInitials = userName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "DU"
+
+  const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("userFullName")
+    }
+    router.push("/")
+  }
 
   return (
     <aside
@@ -148,7 +174,7 @@ export function Sidebar({
       </nav>
 
       {/* Bottom section */}
-      <div style={{ borderTop: BORDER, padding: "12px" }}>
+      <div style={{ borderTop: BORDER, padding: "12px", display: "flex", flexDirection: "column", gap: 8, alignItems: collapsed ? "center" : "stretch" }}>
         {/* User section */}
         <div
           style={{
@@ -156,6 +182,7 @@ export function Sidebar({
             alignItems: "center",
             gap: 12,
             padding: "8px",
+            width: "100%",
           }}
         >
           <div
@@ -173,19 +200,75 @@ export function Sidebar({
               flexShrink: 0,
             }}
           >
-            FS
+            {userInitials}
           </div>
           {!collapsed && (
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: colors.navy, lineHeight: 1.3 }}>
-                Demo User
-              </p>
-              <p style={{ margin: 0, fontSize: 10, color: "#94a3b8", lineHeight: 1.3 }}>
-                Admin
-              </p>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 0 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: colors.navy, lineHeight: 1.3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {userName}
+                </p>
+                <p style={{ margin: 0, fontSize: 10, color: "#94a3b8", lineHeight: 1.3 }}>
+                  Admin
+                </p>
+              </div>
+              <button
+                onClick={handleLogout}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  padding: "6px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  color: "#94a3b8",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "all 0.15s ease"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "#ef4444"
+                  e.currentTarget.style.background = "#FEF2F2"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "#94a3b8"
+                  e.currentTarget.style.background = "transparent"
+                }}
+                title="Log out"
+              >
+                <LogOut style={{ width: 14, height: 14 }} />
+              </button>
             </div>
           )}
         </div>
+        {collapsed && (
+          <button
+            onClick={handleLogout}
+            style={{
+              background: "transparent",
+              border: "none",
+              padding: "6px",
+              borderRadius: "6px",
+              cursor: "pointer",
+              color: "#94a3b8",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "all 0.15s ease"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#ef4444"
+              e.currentTarget.style.background = "#FEF2F2"
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "#94a3b8"
+              e.currentTarget.style.background = "transparent"
+            }}
+            title="Log out"
+          >
+            <LogOut style={{ width: 14, height: 14 }} />
+          </button>
+        )}
       </div>
     </aside>
   )

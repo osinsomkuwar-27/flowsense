@@ -13,9 +13,8 @@ export function Navbar() {
     { label: "Home", href: "/#home" },
     { label: "Features", href: "/#features" },
     { label: "How it works", href: "/#how-it-works" },
-    { label: "Integrations", href: "/#integrations" },
-    { label: "Pricing", href: "/#pricing" },
-    { label: "FAQ", href: "/#faq" },
+    { label: "Built For", href: "/#built-for" },
+    { label: "Referrals", href: "/#referrals" },
   ]
 
   useEffect(() => {
@@ -61,7 +60,7 @@ export function Navbar() {
                 size="sm"
                 className={`hidden sm:inline-flex ${!scrolled ? "text-white hover:text-white hover:bg-white/10" : ""}`}
               >
-                Sign in
+                Log in
               </Button>
             </Link>
             <Link href="/signup">
@@ -105,7 +104,7 @@ export function Navbar() {
             <div className="mt-2 flex flex-col gap-2 px-3">
               <Link href="/login">
                 <Button variant="outline" size="sm" className="w-full">
-                  Sign in
+                  Log in
                 </Button>
               </Link>
               <Link href="/signup">

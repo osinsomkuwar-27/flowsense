@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { colors } from "@/lib/colors"
 import { Search, Filter, ExternalLink } from "lucide-react"
 import { mockEvents } from "@/lib/mock-data"
@@ -21,6 +21,12 @@ const SEVERITY_COLORS: Record<Severity, { bg: string; text: string }> = {
 }
 
 export function EventsView() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const [search, setSearch] = useState("")
   const [sourceFilter, setSourceFilter] = useState<EventSource | "all">("all")
 
@@ -136,7 +142,7 @@ export function EventsView() {
                   </span>
                 </td>
                 <td style={{ padding: "10px 14px", color: "#94A3B8", fontSize: 12 }}>
-                  {new Date(event.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  {mounted ? new Date(event.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "--:--"}
                 </td>
               </tr>
             ))}

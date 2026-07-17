@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { colors } from "@/lib/colors"
 import {
   AlertTriangle,
@@ -77,6 +77,19 @@ function CustomChartTooltip({ active, payload, label }: TooltipProps) {
 }
 
 export function OverviewView() {
+  const [mounted, setMounted] = useState(false)
+  const [userName, setUserName] = useState("Demo User")
+
+  useEffect(() => {
+    setMounted(true)
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("userFullName")
+      if (stored) {
+        setUserName(stored)
+      }
+    }
+  }, [])
+
   const [activeTab, setActiveTab] = useState("Overview")
 
   // Generate comparison data for double line chart (current vs baseline)
@@ -119,7 +132,7 @@ export function OverviewView() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 26, fontWeight: 300, color: "#1e293b", letterSpacing: "-0.02em" }}>
-            Good Morning, <span style={{ fontWeight: 700, color: colors.navy }}>Demo User</span>
+            Good Morning, <span style={{ fontWeight: 400, color: colors.accent }}>{userName}</span>
           </h1>
           <p style={{ margin: 0, fontSize: 13, color: "#94A3B8", marginTop: 4 }}>
             Your DevOps performance summary this week
@@ -161,7 +174,7 @@ export function OverviewView() {
               <Calendar style={{ width: 14, height: 14, color: "#64748b" }} />
             </div>
             <span style={{ padding: "8px 12px", fontSize: 12, fontWeight: 500, color: "#475569" }}>
-              {new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" })}
+              {mounted ? new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" }) : "--/--/----"}
             </span>
           </div>
 
@@ -282,7 +295,7 @@ export function OverviewView() {
             }}
           >
             <span style={{ fontSize: 11, fontWeight: 500, color: "#64748b" }}>{metric.label}</span>
-            <span style={{ fontSize: 24, fontWeight: 700, color: colors.navy, letterSpacing: "-0.03em" }}>{metric.value}</span>
+            <span style={{ fontSize: 24, fontWeight: 500, color: colors.navy, letterSpacing: "-0.03em" }}>{metric.value}</span>
             <span style={{
               fontSize: 10,
               fontWeight: 700,
@@ -383,7 +396,7 @@ export function OverviewView() {
           }}>
             <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#fff/80" }}>Status Summary</h3>
             <span style={{ fontSize: 11, color: "rgba(255, 255, 255, 0.6)", marginTop: 4 }}>Closed Anomalies Value</span>
-            <span style={{ fontSize: 32, fontWeight: 700, color: "#fff", marginTop: 8, letterSpacing: "-0.03em" }}>357</span>
+            <span style={{ fontSize: 32, fontWeight: 500, color: "#fff", marginTop: 8, letterSpacing: "-0.03em" }}>357</span>
             
             {/* Sparkline line wave */}
             <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 50 }}>
@@ -440,7 +453,7 @@ export function OverviewView() {
                     </Pie>
                   </PieChart>
                 </ResponsiveContainer>
-                <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", fontSize: 12, fontWeight: 700, color: colors.navy }}>
+                <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", fontSize: 12, fontWeight: 500, color: colors.navy }}>
                   75%
                 </div>
               </div>
@@ -472,7 +485,7 @@ export function OverviewView() {
                     </Pie>
                   </PieChart>
                 </ResponsiveContainer>
-                <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", fontSize: 12, fontWeight: 700, color: colors.navy }}>
+                <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", fontSize: 12, fontWeight: 500, color: colors.navy }}>
                   99%
                 </div>
               </div>
