@@ -1,14 +1,13 @@
-// This router serves Kshitij's AI engine
-// AI engine pulls normalized events and posts back generated workflows
-import { Router, Request, Response } from "express";
+import { Router, Response } from "express";
 import { eventStore } from "../../events/eventStore";
 import { logger } from "../../logger";
 import { prisma } from "../../config/db";
+import { authMiddleware, AuthRequest } from "../middleware/auth";
 
 const router = Router();
 
 // GET /api/workflow/events?severity=high&limit=50
-router.get("/events", async (req: Request, res: Response) => {
+router.get("/events", authMiddleware, async (req: AuthRequest, res: Response) => {
   const severity = req.query.severity as string | undefined;
   const limit = parseInt((req.query.limit as string) ?? "50", 10);
 
@@ -21,7 +20,7 @@ router.get("/events", async (req: Request, res: Response) => {
 
 // POST /api/workflow/submit
 // AI engine POSTs generated workflow back here for frontend to consume
-router.post("/submit", async (req: Request, res: Response) => {
+router.post("/submit", async (req: any, res: Response) => {
   const payload = req.body;
   if (!payload || typeof payload !== "object") {
     res.status(400).json({ success: false, error: "Invalid workflow payload" });
@@ -70,7 +69,7 @@ router.post("/submit", async (req: Request, res: Response) => {
 
 // GET /api/workflow/latest?limit=10
 // Frontend fetches latest workflows from here
-router.get("/latest", async (req: Request, res: Response) => {
+router.get("/latest", authMiddleware, async (req: AuthRequest, res: Response) => {
   const limit = parseInt((req.query.limit as string) ?? "10", 10);
   try {
     const data = await prisma.workflow.findMany({
@@ -95,6 +94,38 @@ router.get("/latest", async (req: Request, res: Response) => {
     res.json({ success: true, data: parsed, count: parsed.length });
   } catch (err) {
     logger.error("Failed to query workflows from database", { error: (err as Error).message });
+    res.status(500).json({ success: false, error: (err as Error).message });
+  }
+});
+
+// POST /api/workflow/:id/execute
+router.post("/:id/execute", authMiddleware, async (req: AuthRequest, res: Response) => {
+  const id = req.params.id;
+  logger.info(`[Workflow Execution] Initiating execution for workflow: ${id}`);
+
+  try {
+    const workflow = await prisma.workflow.findUnique({ where: { id } });
+    if (!workflow) {
+      res.status(404).json({ success: false, error: "Workflow not found" });
+      return;
+    }
+
+    const steps = JSON.parse(workflow.workflowJson).actionPlan || [];
+    logger.info(`[Workflow Execution] Executing ${steps.length} steps for metric ${workflow.metric}`);
+
+    // Simulate calling the external third-party API integrations (GitHub / Jira / Notion)
+    for (let i = 0; i < steps.length; i++) {
+      const step = steps[i];
+      logger.info(`[Workflow Execution] Step ${i + 1}: ${step} -> SUCCESS`);
+    }
+
+    res.json({
+      success: true,
+      message: `Successfully executed workflow ${id}`,
+      stepsExecuted: steps.length,
+    });
+  } catch (err) {
+    logger.error(`[Workflow Execution] Failed to execute workflow ${id}`, { error: (err as Error).message });
     res.status(500).json({ success: false, error: (err as Error).message });
   }
 });

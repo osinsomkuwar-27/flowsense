@@ -5,12 +5,13 @@ import { colors } from "@/lib/colors"
 import { GitBranch, ArrowRight } from "lucide-react"
 import { mockWorkflows } from "@/lib/mock-data"
 import { Button } from "@/components/ui/button"
-import { fetchWorkflows } from "@/lib/api-client"
+import { fetchWorkflows, executeWorkflow } from "@/lib/api-client"
 import type { WorkflowSuggestion } from "@/lib/types"
 
 export function WorkflowsView() {
   const [mounted, setMounted] = useState(false)
   const [workflows, setWorkflows] = useState<WorkflowSuggestion[]>([])
+  const [executingId, setExecutingId] = useState<string | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -31,7 +32,18 @@ export function WorkflowsView() {
     loadWorkflows()
   }, [mounted])
 
-  const activeWorkflows = workflows.length > 0 ? workflows : mockWorkflows
+  const handleApplyWorkflow = async (id: string) => {
+    setExecutingId(id)
+    try {
+      await executeWorkflow(id)
+      alert("Workflow execution triggered successfully!")
+    } catch (err) {
+      console.error("Workflow execution failed:", err)
+      alert("Failed to execute workflow: " + (err as Error).message)
+    } finally {
+      setExecutingId(null)
+    }
+  }
 
   return (
     <div style={{ padding: "24px 28px", maxWidth: 1200 }}>
@@ -141,9 +153,10 @@ export function WorkflowsView() {
               <Button
                 variant="default"
                 size="sm"
-                onClick={() => {}}
+                onClick={() => handleApplyWorkflow(workflow.id)}
+                disabled={executingId === workflow.id}
               >
-                Apply workflow
+                {executingId === workflow.id ? "Executing..." : "Apply workflow"}
                 <ArrowRight style={{ width: 14, height: 14 }} />
               </Button>
             </div>

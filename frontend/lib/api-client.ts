@@ -165,3 +165,9 @@ export async function triggerManualPoll(source: string): Promise<Integration> {
     method: "POST",
   })
 }
+
+export async function executeWorkflow(id: string): Promise<any> {
+  return await fetchJson<any>(`${API_BASE_URL}/api/workflow/${id}/execute`, {
+    method: "POST",
+  })
+}
