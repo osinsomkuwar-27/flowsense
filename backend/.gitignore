@@ -60,9 +60,15 @@ credentials.json
 # Local databases
 *.sqlite
 *.sqlite3
+dev.db
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
 
 # Docker (optional)
 .docker/
 
 # Misc
 *.tgz
+/src/generated/prisma

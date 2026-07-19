@@ -25,7 +25,7 @@ async function runPoller(
     try {
       const events = await pollFn();
       if (events.length > 0) {
-        eventStore.append(events);
+        await eventStore.append(events);
         await emitToAnomalyEngine(events);
         logger.info(`[Scheduler] ${name} → ${events.length} events ingested`);
       } else {

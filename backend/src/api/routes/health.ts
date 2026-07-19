@@ -5,13 +5,13 @@ import { nowUTC } from "../../utils/timestamp";
 const router = Router();
 const startTime = Date.now();
 
-router.get("/", (_req: Request, res: Response) => {
+router.get("/", async (_req: Request, res: Response) => {
   res.json({
     status: "ok",
     service: "flowzint-backend",
     timestamp: nowUTC(),
     uptime: Math.floor((Date.now() - startTime) / 1000),
-    eventsIngested: eventStore.count(),
+    eventsIngested: await eventStore.count(),
   });
 });
 

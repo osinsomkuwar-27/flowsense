@@ -4,17 +4,18 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "dev": "nodemon --exec ts-node src/index.ts",
-  "build": "tsc",
-  "start": "node dist/index.js",
-  "test": "jest --coverage",
-  "lint": "tsc --noEmit"
+    "dev": "nodemon --exec ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest --coverage",
+    "lint": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@prisma/client": "^7.8.0",
     "axios": "^1.18.1",
     "bottleneck": "^2.19.5",
     "bullmq": "^5.79.2",
@@ -33,14 +34,15 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.18",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
-    "@types/node": "^26.0.1",
-    "@types/cors": "^2.8.18",
     "@types/morgan": "^1.9.4",
+    "@types/node": "^26.0.1",
     "@types/supertest": "^7.2.0",
     "jest": "^30.4.2",
     "nodemon": "^3.1.14",
+    "prisma": "^7.8.0",
     "supertest": "^7.2.2",
     "ts-jest": "^29.4.11",
     "ts-node": "^10.9.2",

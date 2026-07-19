@@ -1,62 +1,140 @@
-import { NormalizedEvent, EventQuery } from "../types";
+import { NormalizedEvent, EventQuery, EventSource, Severity, EventStatus } from "../types";
 import { logger } from "../logger";
+import { prisma } from "../config/db";
 
-// In-memory store for hackathon. In production: replace with TimescaleDB or ClickHouse.
+function parseValue(val: string): number | string | boolean | null {
+  if (val === "null" || val === "") return null;
+  if (val === "true") return true;
+  if (val === "false") return false;
+  const num = Number(val);
+  if (!isNaN(num)) return num;
+  return val;
+}
+
+function mapPrismaEvent(e: any): NormalizedEvent {
+  return {
+    id: e.id,
+    version: 1,
+    source: e.source as EventSource,
+    eventType: e.eventType,
+    resource: e.resource,
+    timestamp: e.timestamp.toISOString(),
+    ingestedAt: e.timestamp.toISOString(),
+    metric: e.metric,
+    value: parseValue(e.value),
+    metadata: e.metadata ? JSON.parse(e.metadata) : {},
+    severity: e.severity as Severity,
+    status: e.status as EventStatus,
+    dedupKey: e.id,
+    tags: e.tags ? e.tags.split(",") : [],
+  };
+}
+
 class EventStore {
-  private events: NormalizedEvent[] = [];
-  private readonly MAX_EVENTS = 50000;
+  async append(events: NormalizedEvent[]): Promise<void> {
+    if (events.length === 0) return;
 
-  append(events: NormalizedEvent[]): void {
-    this.events.push(...events);
-    if (this.events.length > this.MAX_EVENTS) {
-      this.events = this.events.slice(this.events.length - this.MAX_EVENTS);
+    try {
+      const data = events.map((e) => ({
+        id: e.id,
+        source: e.source,
+        eventType: e.eventType,
+        resource: e.resource,
+        timestamp: new Date(e.timestamp),
+        metric: e.metric,
+        value: String(e.value ?? ""),
+        severity: e.severity,
+        status: e.status,
+        tags: e.tags.join(","),
+        metadata: JSON.stringify(e.metadata || {}),
+      }));
+
+      // In SQLite, createMany is supported. Use skipDuplicates: true to prevent crashing on duplicate ids.
+      await prisma.event.createMany({
+        data,
+        skipDuplicates: true,
+      });
+
+      logger.debug(`EventStore: Appended ${events.length} events to SQLite database`);
+    } catch (err) {
+      logger.error("EventStore append failed", { error: (err as Error).message });
     }
-    logger.debug(`EventStore: total events = ${this.events.length}`);
   }
 
-  query(opts: EventQuery): { data: NormalizedEvent[]; total: number } {
-    let filtered = [...this.events];
+  async query(opts: EventQuery): Promise<{ data: NormalizedEvent[]; total: number }> {
+    try {
+      const where: any = {};
 
-    if (opts.source) filtered = filtered.filter((e) => e.source === opts.source);
-    if (opts.eventType) filtered = filtered.filter((e) => e.eventType === opts.eventType);
-    if (opts.severity) filtered = filtered.filter((e) => e.severity === opts.severity);
-    if (opts.status) filtered = filtered.filter((e) => e.status === opts.status);
-    if (opts.resource) filtered = filtered.filter((e) => e.resource.includes(opts.resource!));
-    if (opts.from) {
-      const from = new Date(opts.from).getTime();
-      filtered = filtered.filter((e) => new Date(e.timestamp).getTime() >= from);
+      if (opts.source) where.source = opts.source;
+      if (opts.eventType) where.eventType = opts.eventType;
+      if (opts.severity) where.severity = opts.severity;
+      if (opts.status) where.status = opts.status;
+      if (opts.resource) {
+        where.resource = { contains: opts.resource };
+      }
+      if (opts.from || opts.to) {
+        where.timestamp = {};
+        if (opts.from) where.timestamp.gte = new Date(opts.from);
+        if (opts.to) where.timestamp.lte = new Date(opts.to);
+      }
+
+      const total = await prisma.event.count({ where });
+
+      const page = opts.page ?? 1;
+      const limit = opts.limit ?? 50;
+      const skip = (page - 1) * limit;
+
+      const events = await prisma.event.findMany({
+        where,
+        orderBy: { timestamp: "desc" },
+        skip,
+        take: limit,
+      });
+
+      return {
+        data: events.map(mapPrismaEvent),
+        total,
+      };
+    } catch (err) {
+      logger.error("EventStore query failed", { error: (err as Error).message });
+      return { data: [], total: 0 };
     }
-    if (opts.to) {
-      const to = new Date(opts.to).getTime();
-      filtered = filtered.filter((e) => new Date(e.timestamp).getTime() <= to);
+  }
+
+  async getBySource(source: string, limit = 200): Promise<NormalizedEvent[]> {
+    try {
+      const events = await prisma.event.findMany({
+        where: { source },
+        orderBy: { timestamp: "desc" },
+        take: limit,
+      });
+      return events.map(mapPrismaEvent).reverse(); // maintain chronological order for anomaly engine
+    } catch (err) {
+      logger.error(`EventStore getBySource failed for ${source}`, { error: (err as Error).message });
+      return [];
     }
-
-    // Sort descending
-    filtered.sort(
-      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
-
-    const total = filtered.length;
-    const page = opts.page ?? 1;
-    const limit = opts.limit ?? 50;
-    const start = (page - 1) * limit;
-    const data = filtered.slice(start, start + limit);
-
-    return { data, total };
   }
 
-  getBySource(source: string, limit = 200): NormalizedEvent[] {
-    return this.events
-      .filter((e) => e.source === source)
-      .slice(-limit);
+  async getAll(limit = 500): Promise<NormalizedEvent[]> {
+    try {
+      const events = await prisma.event.findMany({
+        orderBy: { timestamp: "desc" },
+        take: limit,
+      });
+      return events.map(mapPrismaEvent).reverse();
+    } catch (err) {
+      logger.error("EventStore getAll failed", { error: (err as Error).message });
+      return [];
+    }
   }
 
-  getAll(limit = 500): NormalizedEvent[] {
-    return this.events.slice(-limit);
-  }
-
-  count(): number {
-    return this.events.length;
+  async count(): Promise<number> {
+    try {
+      return await prisma.event.count();
+    } catch (err) {
+      logger.error("EventStore count failed", { error: (err as Error).message });
+      return 0;
+    }
   }
 }
 

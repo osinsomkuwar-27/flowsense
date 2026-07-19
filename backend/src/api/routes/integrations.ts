@@ -9,9 +9,9 @@ import { logger } from "../../logger";
 
 const router = Router();
 
-// Helper to calculate event statistics from eventStore
-function getStatsForSource(source: string) {
-  const allEvents = eventStore.getAll(50000);
+// Helper to calculate event statistics from database
+async function getStatsForSource(source: string) {
+  const allEvents = await eventStore.getAll(50000);
   const totalEvents = allEvents.filter((e) => e.source === source).length;
   
   const todayStart = new Date();
@@ -24,20 +24,22 @@ function getStatsForSource(source: string) {
 }
 
 // GET /api/integrations
-router.get("/", (_req: Request, res: Response) => {
+router.get("/", async (_req: Request, res: Response) => {
   const statuses = integrationStatusStore.getAll();
-  const data = statuses.map((status) => {
-    const stats = getStatsForSource(status.source);
-    return {
-      id: status.source,
-      source: status.source,
-      name: status.name,
-      status: status.status,
-      lastPollAt: status.lastPollAt,
-      eventsToday: stats.eventsToday,
-      totalEvents: stats.totalEvents,
-    };
-  });
+  const data = await Promise.all(
+    statuses.map(async (status) => {
+      const stats = await getStatsForSource(status.source);
+      return {
+        id: status.source,
+        source: status.source,
+        name: status.name,
+        status: status.status,
+        lastPollAt: status.lastPollAt,
+        eventsToday: stats.eventsToday,
+        totalEvents: stats.totalEvents,
+      };
+    })
+  );
 
   res.json({ success: true, data });
 });
@@ -61,12 +63,12 @@ router.post("/poll/:source", async (req: Request, res: Response) => {
     }
 
     if (events.length > 0) {
-      eventStore.append(events);
+      await eventStore.append(events);
       await emitToAnomalyEngine(events);
     }
     
     integrationStatusStore.update(source, "connected");
-    const stats = getStatsForSource(source);
+    const stats = await getStatsForSource(source);
     
     res.json({
       success: true,

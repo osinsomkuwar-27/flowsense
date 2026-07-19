@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  fullName  String?
+  createdAt DateTime @default(now())
+}
+
+model Event {
+  id        String   @id @default(uuid())
+  source    String
+  eventType String
+  resource  String
+  timestamp DateTime
+  metric    String
+  value     String
+  severity  String
+  status    String
+  tags      String   // comma-separated tags
+  metadata  String   // JSON string
+}
+
+model Anomaly {
+  id             String    @id @default(uuid())
+  detectedAt     DateTime  @default(now())
+  severity       String
+  status         String    @default("open")
+  metric         String
+  source         String
+  rootCause      String?
+  businessImpact String?
+  factors        String?   // comma-separated values
+  urgency        String?
+  eventsCount    Int       @default(0)
+}
+
+model Workflow {
+  id             String   @id // usually matches event ID
+  metric         String
+  severity       String
+  source         String
+  rootCause      String
+  businessImpact String
+  factors        String   // comma-separated or JSON array string
+  urgency        String
+  workflowJson   String   // JSON string containing nodes/edges
+  svg            String?
+  processedAt    DateTime @default(now())
+}
