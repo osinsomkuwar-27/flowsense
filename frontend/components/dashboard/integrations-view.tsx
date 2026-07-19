@@ -39,6 +39,19 @@ export function IntegrationsView() {
   const [integrations, setIntegrations] = useState<Integration[]>([])
   const [pollingSource, setPollingSource] = useState<string | null>(null)
 
+  // Add integration modal state hooks
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [newSource, setNewSource] = useState("github")
+  const [newName, setNewName] = useState("")
+  const [newToken, setNewToken] = useState("")
+  const [newOrg, setNewOrg] = useState("")
+  const [newRepos, setNewRepos] = useState("")
+  const [newJiraUrl, setNewJiraUrl] = useState("")
+  const [newJiraEmail, setNewJiraEmail] = useState("")
+  const [newJiraProj, setNewJiraProj] = useState("")
+  const [newNotionDb, setNewNotionDb] = useState("")
+  const [modalError, setModalError] = useState<string | null>(null)
+
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -74,6 +87,64 @@ export function IntegrationsView() {
     }
   }
 
+  const handleSubmitIntegration = async () => {
+    if (!newName || !newSource) {
+      setModalError("Please fill in the integration display name.")
+      return
+    }
+
+    setModalError(null)
+
+    let config: any = { token: newToken }
+    if (newSource === "github") {
+      config.org = newOrg
+      config.repos = newRepos.split(",").map(r => r.trim()).filter(Boolean)
+    } else if (newSource === "jira") {
+      config.baseUrl = newJiraUrl
+      config.email = newJiraEmail
+      config.projectKeys = newJiraProj.split(",").map(p => p.trim()).filter(Boolean)
+    } else if (newSource === "notion") {
+      config.databaseIds = newNotionDb.split(",").map(d => d.trim()).filter(Boolean)
+    }
+
+    try {
+      const token = localStorage.getItem("auth_token")
+      const res = await fetch("http://localhost:4000/api/integrations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          source: newSource,
+          name: newName,
+          config,
+        })
+      })
+      const body = await res.json()
+      if (!res.ok || !body.success) {
+        throw new Error(body.error || "Failed to save integration")
+      }
+
+      setIsModalOpen(false)
+      setNewName("")
+      setNewToken("")
+      setNewOrg("")
+      setNewRepos("")
+      setNewJiraUrl("")
+      setNewJiraEmail("")
+      setNewJiraProj("")
+      setNewNotionDb("")
+      setModalError(null)
+
+      const data = await fetchIntegrations()
+      setIntegrations(data)
+    } catch (err) {
+      console.error(err)
+      setModalError((err as Error).message)
+    }
+  }
+
   return (
     <div style={{ padding: "24px 28px", maxWidth: 1200 }}>
       <div style={{ marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -85,7 +156,7 @@ export function IntegrationsView() {
         </div>
         <Button
           variant="default"
-          onClick={() => {}}
+          onClick={() => setIsModalOpen(true)}
         >
           <Plug style={{ width: 15, height: 15 }} />
           Add Integration
@@ -156,13 +227,35 @@ export function IntegrationsView() {
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
-                <div style={{ background: "#FAFBFC", borderRadius: 8, padding: "10px 12px" }}>
+                <div 
+                  onClick={() => window.location.href = `/dashboard/events?source=${integration.source}`}
+                  style={{ 
+                    background: "#FAFBFC", 
+                    borderRadius: 8, 
+                    padding: "10px 12px",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease"
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#EFF6FF"; e.currentTarget.style.transform = "translateY(-1px)" }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "#FAFBFC"; e.currentTarget.style.transform = "none" }}
+                >
                   <p style={{ margin: 0, fontSize: 10, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.06em" }}>Events today</p>
                   <p style={{ margin: 0, fontSize: 20, fontWeight: 700, color: colors.navy, marginTop: 2 }}>
                     {integration.eventsToday.toLocaleString()}
                   </p>
                 </div>
-                <div style={{ background: "#FAFBFC", borderRadius: 8, padding: "10px 12px" }}>
+                <div 
+                  onClick={() => window.location.href = `/dashboard/events?source=${integration.source}`}
+                  style={{ 
+                    background: "#FAFBFC", 
+                    borderRadius: 8, 
+                    padding: "10px 12px",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease"
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#EFF6FF"; e.currentTarget.style.transform = "translateY(-1px)" }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "#FAFBFC"; e.currentTarget.style.transform = "none" }}
+                >
                   <p style={{ margin: 0, fontSize: 10, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.06em" }}>Total events</p>
                   <p style={{ margin: 0, fontSize: 20, fontWeight: 700, color: colors.navy, marginTop: 2 }}>
                     {integration.totalEvents.toLocaleString()}
@@ -188,6 +281,222 @@ export function IntegrationsView() {
           )
         })}
       </div>
+
+      {isModalOpen && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "rgba(15, 23, 42, 0.4)",
+          backdropFilter: "blur(4px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000,
+        }}>
+          <div style={{
+            background: "#fff",
+            borderRadius: 16,
+            width: "100%",
+            maxWidth: 440,
+            padding: 28,
+            boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+          }}>
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: colors.navy }}>Link New Integration</h2>
+            <p style={{ margin: 0, fontSize: 12, color: "#64748B", marginTop: 4, marginBottom: 20 }}>
+              Connect your developer toolchain pipelines.
+            </p>
+
+            {modalError && (
+              <div style={{ padding: "10px 12px", background: "#FEF2F2", color: "#DC2626", borderRadius: 8, fontSize: 12, fontWeight: 500, marginBottom: 14 }}>
+                ❌ {modalError}
+              </div>
+            )}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 6 }}>
+                  Source Platform
+                </label>
+                <select
+                  value={newSource}
+                  onChange={(e) => setNewSource(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: "1px solid #E2E8F0",
+                    fontSize: 13,
+                    background: "#fff",
+                  }}
+                >
+                  <option value="github">GitHub</option>
+                  <option value="jira">Jira</option>
+                  <option value="notion">Notion</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 6 }}>
+                  Display Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Acme Repo"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: "1px solid #E2E8F0",
+                    fontSize: 13,
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 6 }}>
+                  API Token
+                </label>
+                <input
+                  type="password"
+                  placeholder="Enter secret key or access token"
+                  value={newToken}
+                  onChange={(e) => setNewToken(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: "1px solid #E2E8F0",
+                    fontSize: 13,
+                  }}
+                />
+              </div>
+
+              {newSource === "github" && (
+                <>
+                  <div>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 6 }}>
+                      GitHub Organization / Owner
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. octocat"
+                      value={newOrg}
+                      onChange={(e) => setNewOrg(e.target.value)}
+                      style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E2E8F0", fontSize: 13 }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 6 }}>
+                      Repositories (Comma separated)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. repo1, repo2"
+                      value={newRepos}
+                      onChange={(e) => setNewRepos(e.target.value)}
+                      style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E2E8F0", fontSize: 13 }}
+                    />
+                  </div>
+                </>
+              )}
+
+              {newSource === "jira" && (
+                <>
+                  <div>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 6 }}>
+                      Jira Base URL
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. https://acme.atlassian.net"
+                      value={newJiraUrl}
+                      onChange={(e) => setNewJiraUrl(e.target.value)}
+                      style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E2E8F0", fontSize: 13 }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 6 }}>
+                      Jira Account Email
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="e.g. admin@acme.com"
+                      value={newJiraEmail}
+                      onChange={(e) => setNewJiraEmail(e.target.value)}
+                      style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E2E8F0", fontSize: 13 }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 6 }}>
+                      Project Keys (Comma separated)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. PROJ1, PROJ2"
+                      value={newJiraProj}
+                      onChange={(e) => setNewJiraProj(e.target.value)}
+                      style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E2E8F0", fontSize: 13 }}
+                    />
+                  </div>
+                </>
+              )}
+
+              {newSource === "notion" && (
+                <div>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 6 }}>
+                    Notion Database IDs (Comma separated)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. db_id_1, db_id_2"
+                    value={newNotionDb}
+                    onChange={(e) => setNewNotionDb(e.target.value)}
+                    style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E2E8F0", fontSize: 13 }}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div style={{ marginTop: 24, display: "flex", gap: 10, justifyContent: "flex-end" }}>
+              <button
+                onClick={() => { setIsModalOpen(false); setModalError(null); }}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: 8,
+                  border: "1px solid #E2E8F0",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: "#475569",
+                  background: "#fff",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitIntegration}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: 8,
+                  border: "none",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: "#fff",
+                  background: colors.navy,
+                  cursor: "pointer",
+                }}
+              >
+                Connect
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

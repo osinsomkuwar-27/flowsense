@@ -65,7 +65,7 @@ router.get("/stats", async (_req: Request, res: Response) => {
 
   res.json({
     success: true,
-    stats: {
+    data: {
       total: all.length,
       bySeverity,
       bySource,

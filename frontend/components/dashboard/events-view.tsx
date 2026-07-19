@@ -32,6 +32,13 @@ export function EventsView() {
 
   useEffect(() => {
     setMounted(true)
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search)
+      const src = params.get("source")
+      if (src === "github" || src === "jira" || src === "notion") {
+        setSourceFilter(src)
+      }
+    }
   }, [])
 
   useEffect(() => {

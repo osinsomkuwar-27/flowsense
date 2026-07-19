@@ -32,18 +32,27 @@ export function WorkflowsView() {
     loadWorkflows()
   }, [mounted])
 
+  const [successId, setSuccessId] = useState<string | null>(null)
+  const [errorId, setErrorId] = useState<string | null>(null)
+
   const handleApplyWorkflow = async (id: string) => {
     setExecutingId(id)
+    setSuccessId(null)
+    setErrorId(null)
     try {
       await executeWorkflow(id)
-      alert("Workflow execution triggered successfully!")
+      setSuccessId(id)
+      setTimeout(() => setSuccessId(null), 3000)
     } catch (err) {
       console.error("Workflow execution failed:", err)
-      alert("Failed to execute workflow: " + (err as Error).message)
+      setErrorId(id)
+      setTimeout(() => setErrorId(null), 4000)
     } finally {
       setExecutingId(null)
     }
   }
+
+  const activeWorkflows = workflows.length > 0 ? workflows : mockWorkflows
 
   return (
     <div style={{ padding: "24px 28px", maxWidth: 1200 }}>
@@ -136,27 +145,44 @@ export function WorkflowsView() {
             {workflow.svg && (
               <div 
                 style={{ 
-                  marginTop: 20, 
-                  padding: 16, 
+                  marginTop: 16, 
+                  padding: "12px 20px", 
                   background: "#F8FAFC", 
                   borderRadius: 8, 
-                  border: "1px dashed #E2E8F0",
+                  border: "1px solid #E2E8F0",
                   display: "flex",
                   justifyContent: "center",
-                  overflow: "auto"
+                  alignItems: "center",
+                  overflow: "auto",
+                  maxWidth: 650,
+                  marginLeft: "auto",
+                  marginRight: "auto"
                 }}
                 dangerouslySetInnerHTML={{ __html: workflow.svg }}
               />
             )}
 
-            <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid #F1F5F9", display: "flex", justifyContent: "flex-end" }}>
+            <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid #F1F5F9", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div>
+                {successId === workflow.id && (
+                  <span style={{ fontSize: 12, color: "#16A34A", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
+                    ✓ Applied successfully!
+                  </span>
+                )}
+                {errorId === workflow.id && (
+                  <span style={{ fontSize: 12, color: "#DC2626", fontWeight: 600 }}>
+                    ❌ Execution failed
+                  </span>
+                )}
+              </div>
               <Button
                 variant="default"
                 size="sm"
                 onClick={() => handleApplyWorkflow(workflow.id)}
-                disabled={executingId === workflow.id}
+                disabled={executingId === workflow.id || successId === workflow.id}
+                style={successId === workflow.id ? { backgroundColor: "#16A34A", color: "#fff", borderColor: "#16A34A" } : undefined}
               >
-                {executingId === workflow.id ? "Executing..." : "Apply workflow"}
+                {executingId === workflow.id ? "Executing..." : successId === workflow.id ? "Applied" : "Apply workflow"}
                 <ArrowRight style={{ width: 14, height: 14 }} />
               </Button>
             </div>
