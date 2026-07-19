@@ -33,7 +33,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1.6, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-6 font-display text-4xl leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl"
+              className="mt-6 font-serif-display text-4xl leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl"
             >
               See Everything. Catch Anything.
               <br />
