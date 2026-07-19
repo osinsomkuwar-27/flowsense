@@ -58,3 +58,14 @@ model Workflow {
   svg            String?
   processedAt    DateTime @default(now())
 }
+
+model Integration {
+  id         String   @id @default(uuid())
+  userId     String
+  source     String   // github, jira, notion
+  name       String
+  status     String   @default("connected")
+  configJson String   // stores JSON string with apiKey, baseUrl, org, etc.
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}

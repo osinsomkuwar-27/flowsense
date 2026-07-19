@@ -10,10 +10,16 @@ import type {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
 
 async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
+  let token: string | null = null
+  if (typeof window !== "undefined") {
+    token = localStorage.getItem("auth_token")
+  }
+
   const res = await fetch(url, {
     ...options,
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options?.headers || {}),
     },
   })
