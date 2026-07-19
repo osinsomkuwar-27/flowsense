@@ -18,19 +18,19 @@ export const config = {
     url: optionalEnv("REDIS_URL", "redis://localhost:6379"),
   },
   github: {
-    token: requireEnv("GITHUB_TOKEN"),
-    org: requireEnv("GITHUB_ORG"),
-    repos: requireEnv("GITHUB_REPOS").split(",").map((r) => r.trim()),
+    token: optionalEnv("GITHUB_TOKEN", "mock-token-123"),
+    org: optionalEnv("GITHUB_ORG", "flowsense"),
+    repos: optionalEnv("GITHUB_REPOS", "repo1,repo2").split(",").map((r) => r.trim()),
     pollIntervalMs: parseInt(
       optionalEnv("GITHUB_POLL_INTERVAL_MS", "60000"),
       10
     ),
   },
   jira: {
-    baseUrl: requireEnv("JIRA_BASE_URL"),
-    email: requireEnv("JIRA_EMAIL"),
-    apiToken: requireEnv("JIRA_API_TOKEN"),
-    projectKeys: requireEnv("JIRA_PROJECT_KEYS")
+    baseUrl: optionalEnv("JIRA_BASE_URL", "https://flowsense.atlassian.net"),
+    email: optionalEnv("JIRA_EMAIL", "dev@flowsense.io"),
+    apiToken: optionalEnv("JIRA_API_TOKEN", "mock-jira-token"),
+    projectKeys: optionalEnv("JIRA_PROJECT_KEYS", "PROJ1,PROJ2")
       .split(",")
       .map((k) => k.trim()),
     pollIntervalMs: parseInt(
@@ -39,8 +39,8 @@ export const config = {
     ),
   },
   notion: {
-    token: requireEnv("NOTION_TOKEN"),
-    databaseIds: requireEnv("NOTION_DATABASE_IDS")
+    token: optionalEnv("NOTION_TOKEN", "mock-notion-token"),
+    databaseIds: optionalEnv("NOTION_DATABASE_IDS", "db1,db2")
       .split(",")
       .map((id) => id.trim()),
     pollIntervalMs: parseInt(

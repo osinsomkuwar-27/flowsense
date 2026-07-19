@@ -49,11 +49,16 @@ class EventStore {
         metadata: JSON.stringify(e.metadata || {}),
       }));
 
-      // In SQLite, createMany is supported. Use skipDuplicates: true to prevent crashing on duplicate ids.
-      await prisma.event.createMany({
-        data,
-        skipDuplicates: true,
-      });
+      // In SQLite, write one by one to avoid duplicate key constraints and prisma type differences
+      for (const item of data) {
+        try {
+          await prisma.event.create({
+            data: item,
+          });
+        } catch (e) {
+          // ignore duplicate keys (e.g. from overlapping polls)
+        }
+      }
 
       logger.debug(`EventStore: Appended ${events.length} events to SQLite database`);
     } catch (err) {

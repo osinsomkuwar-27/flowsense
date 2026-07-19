@@ -88,7 +88,7 @@ router.post("/", authMiddleware, async (req: AuthRequest, res: Response) => {
 
 // POST /api/integrations/poll/:source
 router.post("/poll/:source", authMiddleware, async (req: AuthRequest, res: Response) => {
-  const source = req.params.source;
+  const source = String(req.params.source);
   logger.info(`[Integrations API] Triggering manual poll for: ${source}`);
 
   try {

@@ -100,7 +100,7 @@ router.get("/latest", authMiddleware, async (req: AuthRequest, res: Response) =>
 
 // POST /api/workflow/:id/execute
 router.post("/:id/execute", authMiddleware, async (req: AuthRequest, res: Response) => {
-  const id = req.params.id;
+  const id = String(req.params.id);
   logger.info(`[Workflow Execution] Initiating execution for workflow: ${id}`);
 
   try {
