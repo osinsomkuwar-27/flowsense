@@ -6,6 +6,7 @@ import { pollNotion } from "../integrations/notion/poller";
 import { eventStore } from "../events/eventStore";
 import { emitToAnomalyEngine } from "../queue/anomalyEmitter";
 import { NormalizedEvent } from "../types";
+import { integrationStatusStore } from "../integrations/statusStore";
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -13,6 +14,7 @@ function sleep(ms: number): Promise<void> {
 
 async function runPoller(
   name: string,
+  source: string,
   pollFn: () => Promise<NormalizedEvent[]>,
   intervalMs: number
 ): Promise<void> {
@@ -29,10 +31,13 @@ async function runPoller(
       } else {
         logger.debug(`[Scheduler] ${name} → 0 new events`);
       }
+      integrationStatusStore.update(source, "connected");
     } catch (err) {
+      const errMsg = (err as Error).message;
       logger.error(`[Scheduler] ${name} poll failed`, {
-        error: (err as Error).message,
+        error: errMsg,
       });
+      integrationStatusStore.update(source, "error", errMsg);
     }
 
     const elapsed = Date.now() - start;
@@ -43,15 +48,15 @@ async function runPoller(
 
 export function startScheduler(): void {
   // Run all pollers in parallel, each with their own independent interval loop
-  runPoller("GitHub", pollGitHub, config.github.pollIntervalMs).catch((err) =>
+  runPoller("GitHub", "github", pollGitHub, config.github.pollIntervalMs).catch((err) =>
     logger.error("[Scheduler] GitHub poller crashed", { error: err.message })
   );
 
-  runPoller("Jira", pollJira, config.jira.pollIntervalMs).catch((err) =>
+  runPoller("Jira", "jira", pollJira, config.jira.pollIntervalMs).catch((err) =>
     logger.error("[Scheduler] Jira poller crashed", { error: err.message })
   );
 
-  runPoller("Notion", pollNotion, config.notion.pollIntervalMs).catch((err) =>
+  runPoller("Notion", "notion", pollNotion, config.notion.pollIntervalMs).catch((err) =>
     logger.error("[Scheduler] Notion poller crashed", { error: err.message })
   );
 }

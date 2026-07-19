@@ -8,6 +8,7 @@ import healthRouter from "./routes/health";
 import eventsRouter from "./routes/events";
 import anomalyRouter from "./routes/anomaly";
 import workflowRouter from "./routes/workflow";
+import integrationsRouter from "./routes/integrations";
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use("/health", healthRouter);
 app.use("/api/events", eventsRouter);
 app.use("/api/anomaly", anomalyRouter);
 app.use("/api/workflow", workflowRouter);
+app.use("/api/integrations", integrationsRouter);
 
 // 404
 app.use((_req, res) => {

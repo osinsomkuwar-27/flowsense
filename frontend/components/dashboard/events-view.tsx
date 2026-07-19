@@ -20,17 +20,41 @@ const SEVERITY_COLORS: Record<Severity, { bg: string; text: string }> = {
   critical: { bg: "#FEE2E2", text: "#991B1B" },
 }
 
+import { fetchEvents } from "@/lib/api-client"
+
 export function EventsView() {
   const [mounted, setMounted] = useState(false)
+  const [events, setEvents] = useState<NormalizedEvent[]>([])
+  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState("")
+  const [sourceFilter, setSourceFilter] = useState<EventSource | "all">("all")
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  const [search, setSearch] = useState("")
-  const [sourceFilter, setSourceFilter] = useState<EventSource | "all">("all")
+  useEffect(() => {
+    if (!mounted) return
 
-  const filtered = mockEvents.filter((e) => {
+    async function loadEvents() {
+      try {
+        const response = await fetchEvents({
+          page,
+          limit: 100,
+          source: sourceFilter === "all" ? undefined : sourceFilter,
+        })
+        setEvents(response.data)
+        setTotal(response.total)
+      } catch (err) {
+        console.error("Failed to load events from API:", err)
+      }
+    }
+
+    loadEvents()
+  }, [mounted, page, sourceFilter])
+
+  const filtered = (events.length > 0 ? events : mockEvents).filter((e) => {
     const matchesSearch = e.resource.toLowerCase().includes(search.toLowerCase()) ||
       e.eventType.toLowerCase().includes(search.toLowerCase()) ||
       e.metric.toLowerCase().includes(search.toLowerCase())

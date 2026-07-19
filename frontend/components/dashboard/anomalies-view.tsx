@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { colors } from "@/lib/colors"
 import { AlertTriangle, ChevronDown, ChevronUp, Clock, Zap } from "lucide-react"
 import { mockAnomalies } from "@/lib/mock-data"
-import type { Severity } from "@/lib/types"
+import type { Severity, AnomalyPayload } from "@/lib/types"
+import { fetchWorkflows } from "@/lib/api-client"
 
 const SEVERITY_STYLES: Record<Severity, { bg: string; text: string; border: string }> = {
   critical: { bg: "#FEE2E2", text: "#991B1B", border: "#FECACA" },
@@ -14,7 +15,45 @@ const SEVERITY_STYLES: Record<Severity, { bg: string; text: string; border: stri
 }
 
 export function AnomaliesView() {
+  const [mounted, setMounted] = useState(false)
+  const [anomalies, setAnomalies] = useState<AnomalyPayload[]>([])
   const [expanded, setExpanded] = useState<string | null>(null)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+
+    async function loadAnomalies() {
+      try {
+        const workflows = await fetchWorkflows()
+        if (workflows.length > 0) {
+          const loaded: AnomalyPayload[] = workflows.map((w) => ({
+            anomalyId: w.id,
+            detectedAt: w.createdAt,
+            severity: "high",
+            status: "open",
+            metric: w.title,
+            source: "github",
+            rootCause: w.description,
+            businessImpact: "Increased risk of delivery delays and pipeline blocks.",
+            factors: w.steps.map(s => s.label),
+            urgency: "high",
+            eventsCount: w.steps.length,
+          }))
+          setAnomalies(loaded)
+        }
+      } catch (err) {
+        console.error("Failed to load anomalies:", err)
+      }
+    }
+
+    loadAnomalies()
+  }, [mounted])
+
+  const activeAnomalies = anomalies.length > 0 ? anomalies : mockAnomalies
 
   return (
     <div style={{ padding: "24px 28px", maxWidth: 1200 }}>
@@ -27,16 +66,16 @@ export function AnomaliesView() {
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <span style={{ padding: "4px 12px", borderRadius: 8, fontSize: 12, fontWeight: 600, background: "#FEE2E2", color: "#991B1B" }}>
-            {mockAnomalies.filter((a) => a.severity === "critical").length} Critical
+            {activeAnomalies.filter((a) => a.severity === "critical").length} Critical
           </span>
           <span style={{ padding: "4px 12px", borderRadius: 8, fontSize: 12, fontWeight: 600, background: "#FEF2F2", color: "#DC2626" }}>
-            {mockAnomalies.filter((a) => a.severity === "high").length} High
+            {activeAnomalies.filter((a) => a.severity === "high").length} High
           </span>
         </div>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {mockAnomalies.map((anomaly) => {
+        {activeAnomalies.map((anomaly) => {
           const isExpanded = expanded === anomaly.anomalyId
           const styles = SEVERITY_STYLES[anomaly.severity]
 

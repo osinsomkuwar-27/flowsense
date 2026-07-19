@@ -31,12 +31,49 @@ const SOURCE_ICONS: Record<string, { icon: React.ReactNode; color: string }> = {
   }
 }
 
+import { fetchIntegrations, triggerManualPoll } from "@/lib/api-client"
+import type { Integration } from "@/lib/types"
+
 export function IntegrationsView() {
   const [mounted, setMounted] = useState(false)
+  const [integrations, setIntegrations] = useState<Integration[]>([])
+  const [pollingSource, setPollingSource] = useState<string | null>(null)
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+
+    async function loadIntegrations() {
+      try {
+        const data = await fetchIntegrations()
+        setIntegrations(data)
+      } catch (err) {
+        console.error("Failed to load integrations:", err)
+      }
+    }
+
+    loadIntegrations()
+  }, [mounted])
+
+  const activeIntegrations = integrations.length > 0 ? integrations : mockIntegrations
+
+  const handlePollNow = async (source: string) => {
+    setPollingSource(source)
+    try {
+      const updated = await triggerManualPoll(source)
+      setIntegrations((prev) =>
+        prev.map((item) => (item.source === source ? updated : item))
+      )
+    } catch (err) {
+      console.error("Manual poll failed:", err)
+    } finally {
+      setPollingSource(null)
+    }
+  }
+
   return (
     <div style={{ padding: "24px 28px", maxWidth: 1200 }}>
       <div style={{ marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -56,7 +93,7 @@ export function IntegrationsView() {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 14 }}>
-        {mockIntegrations.map((integration) => {
+        {activeIntegrations.map((integration) => {
           const sourceStyle = SOURCE_ICONS[integration.source]
           return (
             <div
@@ -140,10 +177,11 @@ export function IntegrationsView() {
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => {}}
+                  onClick={() => handlePollNow(integration.source)}
+                  disabled={pollingSource === integration.source}
                 >
-                  <RefreshCw style={{ width: 12, height: 12 }} />
-                  Poll now
+                  <RefreshCw style={{ width: 12, height: 12 }} className={pollingSource === integration.source ? "animate-spin" : ""} />
+                  {pollingSource === integration.source ? "Polling..." : "Poll now"}
                 </Button>
               </div>
             </div>

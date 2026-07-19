@@ -37,6 +37,13 @@ import {
   mockAttentionItems,
 } from "@/lib/mock-data"
 import { Button } from "@/components/ui/button"
+import {
+  fetchDashboardMetrics,
+  fetchFocusStats,
+  fetchRecentEvents,
+  fetchWorkflows,
+} from "@/lib/api-client"
+import type { DashboardMetrics, FocusStats } from "@/lib/types"
 
 type TooltipProps = {
   active?: boolean
@@ -79,6 +86,10 @@ function CustomChartTooltip({ active, payload, label }: TooltipProps) {
 export function OverviewView() {
   const [mounted, setMounted] = useState(false)
   const [userName, setUserName] = useState("Demo User")
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null)
+  const [focusStats, setFocusStats] = useState<FocusStats | null>(null)
+  const [attentionItems, setAttentionItems] = useState(mockAttentionItems)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     setMounted(true)
@@ -89,6 +100,45 @@ export function OverviewView() {
       }
     }
   }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+
+    async function loadData() {
+      try {
+        const [m, f, workflows, events] = await Promise.all([
+          fetchDashboardMetrics(),
+          fetchFocusStats(),
+          fetchWorkflows(),
+          fetchRecentEvents(),
+        ])
+        setMetrics(m)
+        setFocusStats(f)
+
+        // Build dynamic attention items from high/critical events
+        const dynamicAttention = events
+          .filter(e => e.severity === "high" || e.severity === "critical")
+          .slice(0, 4)
+          .map(e => ({
+            id: e.id,
+            title: e.metric.replace(/_/g, " ").replace(/\./g, " "),
+            subtitle: `${e.resource} — value: ${e.value}`,
+            tone: e.severity === "critical" ? ("danger" as const) : ("warn" as const),
+            value: new Date(e.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          }))
+
+        if (dynamicAttention.length > 0) {
+          setAttentionItems(dynamicAttention)
+        }
+      } catch (err) {
+        console.error("Failed to load overview data:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
+  }, [mounted])
 
   const [activeTab, setActiveTab] = useState("Overview")
 
@@ -278,11 +328,11 @@ export function OverviewView() {
       }}>
         {[
           { label: "Bounce Rate", value: "32.53%", trend: "-0.5%", isUp: false },
-          { label: "Page Views", value: mockMetrics.eventsToday.toLocaleString(), trend: "+12%", isUp: true },
-          { label: "Active Pipelines", value: mockMetrics.activePipelines, trend: "+2", isUp: true },
+          { label: "Page Views", value: (metrics || mockMetrics).eventsToday.toLocaleString(), trend: "+12%", isUp: true },
+          { label: "Active Pipelines", value: (metrics || mockMetrics).activePipelines, trend: "+2", isUp: true },
           { label: "Avg. Time on Site", value: "2m:35s", trend: "+0.8%", isUp: true },
-          { label: "Open Anomalies", value: mockMetrics.openAnomalies, trend: "-3", isUp: false },
-          { label: "Critical Alerts", value: mockMetrics.criticalAlerts, trend: "0", isUp: true },
+          { label: "Open Anomalies", value: (metrics || mockMetrics).openAnomalies, trend: "-3", isUp: false },
+          { label: "Critical Alerts", value: (metrics || mockMetrics).criticalAlerts, trend: "0", isUp: true },
         ].map((metric, idx) => (
           <div
             key={metric.label}
@@ -570,7 +620,7 @@ export function OverviewView() {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 10, flex: 1 }}>
-            {mockAttentionItems.map((item) => (
+            {attentionItems.map((item) => (
               <div
                 key={item.id}
                 style={{
