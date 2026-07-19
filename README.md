@@ -31,7 +31,27 @@ npm run dev
 
 The backend server runs on `http://localhost:4000`.
 
-### 2. Start the Frontend App (Next.js)
+### 2. Configure Environment Variables (`backend/.env`)
+
+Before starting the server, verify or create a `.env` file inside the `backend` folder to configure the SQLite database path and integration settings (credentials fallback to built-in development mocks if left blank):
+
+```ini
+DATABASE_URL="file:./dev.db"
+JWT_SECRET="your-session-jwt-secret"
+
+# Optional integrations configuration
+GITHUB_TOKEN=your_github_token
+GITHUB_ORG=your_github_org
+GITHUB_REPOS=repo1,repo2
+JIRA_BASE_URL=https://your-org.atlassian.net
+JIRA_EMAIL=dev@flowsense.io
+JIRA_API_TOKEN=your_jira_token
+JIRA_PROJECT_KEYS=PROJ1
+NOTION_TOKEN=secret_your_token
+NOTION_DATABASE_IDS=db1
+```
+
+### 3. Start the Frontend App (Next.js)
 
 Navigate to the `frontend` folder, install the dependencies, and start the development app:
 
