@@ -5,8 +5,6 @@ import {
   Clock3,
   TrendingUp,
   Activity,
-  Search,
-  Mail,
   Bell,
   Share2,
   Printer,
@@ -91,6 +89,15 @@ export function OverviewView() {
   const [attentionItems, setAttentionItems] = useState(mockAttentionItems)
   const [loading, setLoading] = useState(true)
 
+  // Interactive header state hooks
+  const [activeTab, setActiveTab] = useState("Overview")
+  const [activeEnv, setActiveEnv] = useState("Production")
+  const [isEnvOpen, setIsEnvOpen] = useState(false)
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+  const [shareCopied, setShareCopied] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const [exportSuccess, setExportSuccess] = useState(false)
+
   useEffect(() => {
     setMounted(true)
     if (typeof window !== "undefined") {
@@ -140,7 +147,6 @@ export function OverviewView() {
     loadData()
   }, [mounted])
 
-  const [activeTab, setActiveTab] = useState("Overview")
 
   // Generate comparison data for double line chart (current vs baseline)
   const lineChartData = mockEventVolume.map((item, idx) => {
@@ -191,24 +197,63 @@ export function OverviewView() {
 
         {/* Right side controls */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {/* Category Dropdown */}
+          {/* Environment Dropdown */}
           <div style={{ position: "relative" }}>
-            <button style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "8px 14px",
-              borderRadius: 8,
-              border: "1px solid #E2E8F0",
-              background: "#fff",
-              fontSize: 12,
-              fontWeight: 600,
-              color: "#475569",
-              cursor: "pointer",
-            }}>
-              Select Environment
+            <button 
+              onClick={() => { setIsEnvOpen(!isEnvOpen); setIsNotificationsOpen(false); }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "8px 14px",
+                borderRadius: 8,
+                border: "1px solid #E2E8F0",
+                background: "#fff",
+                fontSize: 12,
+                fontWeight: 600,
+                color: "#475569",
+                cursor: "pointer",
+              }}
+            >
+              {activeEnv} Env
               <ChevronDown style={{ width: 14, height: 14, color: "#94a3b8" }} />
             </button>
+            {isEnvOpen && (
+              <div style={{
+                position: "absolute",
+                top: "100%",
+                right: 0,
+                marginTop: 6,
+                background: "#fff",
+                border: "1px solid #E2E8F0",
+                borderRadius: 8,
+                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                zIndex: 100,
+                minWidth: 140,
+                overflow: "hidden"
+              }}>
+                {["Production", "Staging", "Development"].map((envOpt) => (
+                  <button
+                    key={envOpt}
+                    onClick={() => { setActiveEnv(envOpt); setIsEnvOpen(false); }}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      padding: "10px 14px",
+                      textAlign: "left",
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: "#334155",
+                      background: activeEnv === envOpt ? "#F8FAFC" : "#fff",
+                      border: "none",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {envOpt}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Calendar Picker */}
@@ -228,18 +273,61 @@ export function OverviewView() {
             </span>
           </div>
 
-          {/* Action Icons */}
-          <div style={{ display: "flex", gap: 8, marginLeft: 6 }}>
-            <button style={{ width: 34, height: 34, borderRadius: "50%", background: "#fff", border: "1px solid #E2E8F0", display: "flex", alignItems: "center", justifyContent: "center", color: "#64748b", cursor: "pointer" }}>
-              <Search style={{ width: 14, height: 14 }} />
-            </button>
-            <button style={{ width: 34, height: 34, borderRadius: "50%", background: "#fff", border: "1px solid #E2E8F0", display: "flex", alignItems: "center", justifyContent: "center", color: "#64748b", cursor: "pointer" }}>
-              <Mail style={{ width: 14, height: 14 }} />
-            </button>
-            <button style={{ width: 34, height: 34, borderRadius: "50%", background: "#fff", border: "1px solid #E2E8F0", display: "flex", alignItems: "center", justifyContent: "center", color: "#64748b", cursor: "pointer", position: "relative" }}>
+          {/* Notifications Center */}
+          <div style={{ position: "relative" }}>
+            <button 
+              onClick={() => { setIsNotificationsOpen(!isNotificationsOpen); setIsEnvOpen(false); }}
+              style={{ 
+                width: 34, 
+                height: 34, 
+                borderRadius: "50%", 
+                background: "#fff", 
+                border: "1px solid #E2E8F0", 
+                display: "flex", 
+                alignItems: "center", 
+                justifyContent: "center", 
+                color: "#64748b", 
+                cursor: "pointer", 
+                position: "relative" 
+              }}
+            >
               <Bell style={{ width: 14, height: 14 }} />
               <span style={{ position: "absolute", top: 10, right: 10, width: 6, height: 6, borderRadius: "50%", background: "#ef4444" }} />
             </button>
+            {isNotificationsOpen && (
+              <div style={{
+                position: "absolute",
+                top: "100%",
+                right: 0,
+                marginTop: 6,
+                background: "#fff",
+                border: "1px solid #E2E8F0",
+                borderRadius: 12,
+                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                zIndex: 100,
+                width: 280,
+                padding: "14px 16px"
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <h4 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: colors.navy }}>Alert Center</h4>
+                  <span style={{ fontSize: 10, background: "#FEF2F2", color: "#EF4444", padding: "2px 6px", borderRadius: 10, fontWeight: 600 }}>Active</span>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{ fontSize: 11, borderBottom: "1px solid #F1F5F9", paddingBottom: 8 }}>
+                    <p style={{ margin: 0, fontWeight: 600, color: "#1E293B" }}>🔴 Blocker Anomaly Detected</p>
+                    <p style={{ margin: "2px 0 0 0", color: "#64748B", lineHeight: 1.3 }}>Pull Request #94 is stagnant for over 72 hours.</p>
+                  </div>
+                  <div style={{ fontSize: 11, borderBottom: "1px solid #F1F5F9", paddingBottom: 8 }}>
+                    <p style={{ margin: 0, fontWeight: 600, color: "#1E293B" }}>🟡 Integration Warning</p>
+                    <p style={{ margin: "2px 0 0 0", color: "#64748B", lineHeight: 1.3 }}>Polling repository flowsense/backend returned 401 Unauthorized.</p>
+                  </div>
+                  <div style={{ fontSize: 11 }}>
+                    <p style={{ margin: 0, fontWeight: 600, color: "#1E293B" }}>🟢 System Status Normal</p>
+                    <p style={{ margin: "2px 0 0 0", color: "#64748B", lineHeight: 1.3 }}>SQLite dev.db active with custom mock telemetry logs.</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Avatar */}
@@ -271,9 +359,9 @@ export function OverviewView() {
         paddingBottom: 0,
         marginBottom: 24,
       }}>
-        {/* Navigation Tabs */}
+        {/* Navigation Tabs (Only keeping Overview) */}
         <div style={{ display: "flex", gap: 24 }}>
-          {["Overview", "Events", "Anomalies", "Workflows", "More"].map((tab) => {
+          {["Overview"].map((tab) => {
             const isActive = activeTab === tab
             return (
               <button
@@ -300,17 +388,46 @@ export function OverviewView() {
 
         {/* Share/Print/Export Actions */}
         <div style={{ display: "flex", gap: 8, paddingBottom: 6 }}>
-          <Button variant="secondary" size="sm" style={{ padding: "6px 12px", height: 32 }}>
+          <Button 
+            variant="secondary" 
+            size="sm" 
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                navigator.clipboard.writeText(window.location.origin + "/dashboard")
+                setShareCopied(true)
+                setTimeout(() => setShareCopied(false), 2000)
+              }
+            }}
+            style={{ padding: "6px 12px", height: 32 }}
+          >
             <Share2 style={{ width: 12, height: 12 }} />
-            Share
+            {shareCopied ? "Copied!" : "Share"}
           </Button>
-          <Button variant="secondary" size="sm" style={{ padding: "6px 12px", height: 32 }}>
+          <Button 
+            variant="secondary" 
+            size="sm" 
+            onClick={() => window.print()}
+            style={{ padding: "6px 12px", height: 32 }}
+          >
             <Printer style={{ width: 12, height: 12 }} />
             Print
           </Button>
-          <Button variant="default" size="sm" style={{ padding: "6px 14px", height: 32 }}>
+          <Button 
+            variant="default" 
+            size="sm" 
+            disabled={exporting}
+            onClick={() => {
+              setExporting(true)
+              setTimeout(() => {
+                setExporting(false)
+                setExportSuccess(true)
+                setTimeout(() => setExportSuccess(false), 2000)
+              }, 1200)
+            }}
+            style={{ padding: "6px 14px", height: 32 }}
+          >
             <Download style={{ width: 12, height: 12 }} />
-            Export
+            {exporting ? "Exporting..." : exportSuccess ? "Exported!" : "Export"}
           </Button>
         </div>
       </div>
