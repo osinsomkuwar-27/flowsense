@@ -7,9 +7,14 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Logo } from "@/components/ui/logo"
 import { Button } from "@/components/ui/button"
 
+import { useAuth } from "@/components/auth-provider"
+
 export function LoginPage() {
   const router = useRouter()
+  const { login } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -24,10 +29,17 @@ export function LoginPage() {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Will integrate backend auth later
-    router.push("/dashboard")
+    setError(null)
+    setLoading(true)
+    try {
+      await login(formData.email, formData.password)
+    } catch (err) {
+      setError((err as Error).message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -74,6 +86,11 @@ export function LoginPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="rounded-lg bg-red-50 p-3 text-xs text-red-600 border border-red-200">
+                  {error}
+                </div>
+              )}
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">Email Address</label>
                 <input
@@ -128,8 +145,9 @@ export function LoginPage() {
                 type="submit"
                 variant="primary"
                 className="w-full"
+                disabled={loading}
               >
-                Log in
+                {loading ? "Logging in..." : "Log in"}
               </Button>
             </form>
 

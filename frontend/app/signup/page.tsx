@@ -5,10 +5,14 @@ import { Eye, EyeOff, ArrowLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Logo } from "@/components/ui/logo"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/components/auth-provider"
 
 export default function SignUp() {
   const router = useRouter()
+  const { signup } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -21,13 +25,22 @@ export default function SignUp() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (typeof window !== "undefined") {
-      localStorage.setItem("userFullName", formData.fullName)
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match")
+      return
     }
-    // Will integrate backend auth later
-    router.push("/dashboard")
+
+    setError(null)
+    setLoading(true)
+    try {
+      await signup(formData.email, formData.password, formData.fullName)
+    } catch (err) {
+      setError((err as Error).message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -64,6 +77,11 @@ export default function SignUp() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="rounded-lg bg-red-50 p-3 text-xs text-red-600 border border-red-200">
+                  {error}
+                </div>
+              )}
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">Full Name</label>
                 <input
@@ -129,8 +147,9 @@ export default function SignUp() {
                 type="submit"
                 variant="primary"
                 className="w-full"
+                disabled={loading}
               >
-                Create account
+                {loading ? "Creating account..." : "Create account"}
               </Button>
             </form>
           </div>

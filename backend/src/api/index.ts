@@ -9,6 +9,7 @@ import eventsRouter from "./routes/events";
 import anomalyRouter from "./routes/anomaly";
 import workflowRouter from "./routes/workflow";
 import integrationsRouter from "./routes/integrations";
+import authRouter from "./routes/auth";
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use("/api/events", eventsRouter);
 app.use("/api/anomaly", anomalyRouter);
 app.use("/api/workflow", workflowRouter);
 app.use("/api/integrations", integrationsRouter);
+app.use("/api/auth", authRouter);
 
 // 404
 app.use((_req, res) => {

@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import { colors } from "@/lib/colors"
 import { Logo } from "@/components/ui/logo"
+import { useAuth } from "@/components/auth-provider"
 
 const NAV_GROUPS = [
   {
@@ -70,11 +71,10 @@ export function Sidebar({
     .slice(0, 2)
     .toUpperCase() || "DU"
 
+  const { logout } = useAuth()
+
   const handleLogout = () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("userFullName")
-    }
-    router.push("/")
+    logout()
   }
 
   return (
